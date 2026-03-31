@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>霜狼鬼抓人</title>
     <style>
+        /* === 加入全局格子大小變數 === */
+        :root {
+            --cell-size: 70px;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
@@ -142,11 +147,41 @@
             box-shadow: none;
         }
 
+        /* === 重製手機版優化 (解決標題重疊問題) === */
         @media (max-width: 600px) {
-            .header-hud { gap: 8px; flex-direction: column; }
-            .portrait-ui { width: 70px; height: 70px; } 
-            h1 { font-size: 24px; }
-            .controls button { font-size: 13px; padding: 5px 10px; }
+            .header-hud { 
+                gap: 10px; 
+                flex-direction: row; 
+                padding: 0 10px;
+                box-sizing: border-box;
+                align-items: flex-start;
+            }
+            .title-area {
+                flex: 1; 
+                min-width: 0;
+            }
+            .portrait-ui { 
+                width: 65px; 
+                height: 65px; 
+                margin-top: 5px;
+            } 
+            .portrait-ui::after {
+                font-size: 11px;
+                bottom: -20px;
+            }
+            h1 { 
+                font-size: 20px; 
+                white-space: nowrap; 
+                margin-bottom: 8px;
+            }
+            .controls {
+                gap: 5px;
+            }
+            .controls button { 
+                font-size: 12px; 
+                padding: 6px 4px; 
+                flex: 1 1 45%; 
+            }
         }
         
         /* === 遊戲盤面設定 === */
@@ -159,11 +194,14 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.9);
             margin-bottom: 15px;
             border: 2px solid rgba(255,255,255,0.05);
+            max-width: 100vw;
+            box-sizing: border-box;
         }
 
         .cell {
-            width: 70px; 
-            height: 70px;
+            /* 使用 CSS 變數控制大小，方便 JS 動態調整 */
+            width: var(--cell-size); 
+            height: var(--cell-size);
             border-radius: 4px;
             display: flex;
             justify-content: center;
@@ -205,7 +243,6 @@
 
         .walking { animation: walk-cycle 0.6s infinite step-end; }
 
-        /* === 戰爭迷霧 (Fog of War) 系統 === */
         .cell.unexplored {
             background-color: #000 !important;
             background-image: none !important;
@@ -222,13 +259,13 @@
         .cell.visible { filter: brightness(1) contrast(1); }
 
         .collision-emoji {
-            font-size: 35px;
+            font-size: calc(var(--cell-size) * 0.5); /* 隨著格子大小等比縮放 */
             color: #fff;
             z-index: 20;
             position: relative;
         }
 
-        /* === 主題材質設置 === */
+        /* 主題材質設置 (省略) */
         .cell.floor-tavern {
             background-color: #9c5b2b;
             background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'><rect width='80' height='80' fill='%23a6683c'/><rect y='20' width='80' height='20' fill='%2391562e'/><rect y='60' width='80' height='20' fill='%23804a26'/><path d='M0 20h80M0 40h80M0 60h80' stroke='%23573016' stroke-width='2'/></svg>");
@@ -285,7 +322,7 @@
             text-align: center;
         }
 
-        /* === 通關 CG 彈窗 ================= */
+        /* === 通關 CG 彈窗 === */
         #cg-modal {
             position: fixed;
             top: 0;
@@ -389,12 +426,32 @@
         let cols, rows, rockDensity, currentTheme;
         let playerPos, aiPos, rocks, gameOver;
         
-        // 紀錄玩家的解鎖進度 (預設 1)
         let unlockedLevel = 1;
         
         let fogOfWarMap = [];
         let playerFaceDir = 'face-down';
         let aiFaceDir = 'face-down';
+
+        // 動態計算並套用最適合的格子尺寸
+        function applyDynamicCellSize(c) {
+            let screenW = window.innerWidth;
+            let maxCellSize = 70; // 電腦版的標準大尺寸
+            
+            if (screenW < 600) {
+                // 扣掉版面左右安全距離與 grid gap 的總寬度，下去平分給 c (欄位數)
+                let availableWidth = screenW - 30; 
+                let calculatedSize = Math.floor((availableWidth - (c - 1) * 3) / c);
+                maxCellSize = Math.min(70, calculatedSize);
+            }
+            
+            document.documentElement.style.setProperty('--cell-size', `${maxCellSize}px`);
+            boardElement.style.gridTemplateColumns = `repeat(${c}, var(--cell-size))`;
+        }
+
+        // 當旋轉螢幕或調整視窗大小時自動重新計算
+        window.addEventListener('resize', () => {
+            if (cols) applyDynamicCellSize(cols);
+        });
 
         function initGame(c, r, density, theme) {
             cols = c;
@@ -414,7 +471,8 @@
             document.querySelectorAll('.controls button').forEach(btn => btn.classList.remove('active'));
             document.getElementById('btn-' + theme).classList.add('active');
             
-            boardElement.style.gridTemplateColumns = `repeat(${cols}, 70px)`;
+            // 呼叫計算尺寸的函數
+            applyDynamicCellSize(cols);
 
             generateMap();
             
@@ -651,13 +709,11 @@
             }
         }
 
-        // [重點更新] 遊戲結束判定與進度解鎖、彈窗呼叫
         function endGame(msg, color, isWin = false) {
             gameOver = true;
             msgElement.innerText = msg;
             msgElement.style.color = color;
             
-            // 確保最後一次移動被畫出來
             drawBoard();
 
             if (isWin) {
@@ -666,9 +722,7 @@
                 const cgText = document.getElementById('cg-text');
                 const cgBtn = document.getElementById('cg-btn');
 
-                // 判斷當前關卡並設定對應的圖片與文字
                 if (currentTheme === 'tavern') {
-                    // 解鎖下一關邏輯
                     if (unlockedLevel < 2) {
                         unlockedLevel = 2;
                         document.getElementById('btn-stormwind').disabled = false;
@@ -678,7 +732,6 @@
                     cgBtn.innerText = '繼續';
 
                 } else if (currentTheme === 'stormwind') {
-                    // 解鎖下一關邏輯
                     if (unlockedLevel < 3) {
                         unlockedLevel = 3;
                         document.getElementById('btn-northrend').disabled = false;
@@ -693,14 +746,12 @@
                     cgBtn.innerText = '完成遊戲';
                 }
 
-                // 稍微延遲彈窗，讓玩家看清楚最後的相撞特效
                 setTimeout(() => {
                     cgModal.classList.remove('hidden');
                 }, 400);
             }
         }
 
-        // 關閉 CG 彈窗的函數
         function closeCGModal() {
             document.getElementById('cg-modal').classList.add('hidden');
         }
