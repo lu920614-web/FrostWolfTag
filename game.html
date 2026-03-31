@@ -17,7 +17,7 @@
             min-height: 100vh;
         }
 
-        /* === [優化] 頂部控制台 (HUD) 響應式排版 === */
+        /* === 頂部控制台 (HUD) === */
         .header-hud {
             display: flex;
             align-items: center;
@@ -53,7 +53,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.8);
             border: 3px solid rgba(255,255,255,0.1);
             transition: background-position 0.2s, border-color 0.3s;
-            flex-shrink: 0; /* 防止頭像在手機上被過度擠壓 */
+            flex-shrink: 0; 
         }
         .portrait-ui::after {
             content: attr(data-name);
@@ -83,7 +83,7 @@
 
         /* 頭像表情定位 */
         .emote-smile { background-position: 0% 0%; }         
-        .emote-serious { background-position: 33.33% 0%; }   
+        .emote-serious { background-position: 33.33% 0%; }   /* 上二：有點生氣的表情 */
         .emote-cry { background-position: 66.66% 0%; }       
         .emote-angry { background-position: 100% 0%; }       
         .emote-wolf { background-position: 0% 100%; }        
@@ -118,10 +118,9 @@
             background-color: #34495e;
         }
 
-        /* === 響應式手機版面微調 === */
         @media (max-width: 600px) {
             .header-hud { gap: 10px; }
-            .portrait-ui { width: 75px; height: 75px; } /* 手機上頭像縮小一點 */
+            .portrait-ui { width: 75px; height: 75px; } 
             h1 { font-size: 24px; }
         }
         
@@ -146,51 +145,68 @@
             align-items: center;
             position: relative;
             box-shadow: inset 0 0 8px rgba(0,0,0,0.4);
-            color: transparent; /* 隱藏 Emoji */
-            font-size: 0;
         }
 
         /* =========================================
-           [重點修復] 行走精靈圖與地板完美分離
+           [重點修復] 行走精靈圖與地板完美分離 (多重背景法)
            ========================================= */
-        /* 我們把角色畫在 ::after 這個獨立的虛擬圖層上，這樣就不會影響地板大小 */
-        .cell.sprite::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-size: 300% 400%; /* 精靈圖比例 */
-            background-repeat: no-repeat;
+        .cell.sprite {
+            color: transparent !important; /* 隱藏 Emoji */
+            font-size: 0 !important;
             z-index: 5;
-            pointer-events: none;
         }
 
-        .cell.sprite-frostwolf::after { background-image: url('02.png'); }
-        .cell.sprite-asmodan::after { background-image: url('04.png'); }
-
-        /* [修復] 方向定位：橫向 3 幀，中間站立幀在 50% */
-        .face-down::after { background-position: 50% 0%; }
-        .face-left::after { background-position: 50% 33.33%; }
-        .face-right::after { background-position: 50% 66.66%; }
-        .face-up::after { background-position: 50% 100%; }
-
-        /* [優化] 完美的 RPGMaker 步伐動畫：站立 -> 踏步 -> 站立 -> 踏另一腳 */
-        @keyframes rpg-walk {
-            0%   { background-position-x: 50%; }  /* 站立 */
-            25%  { background-position-x: 0%; }   /* 踏出左腳 */
-            50%  { background-position-x: 50%; }  /* 收回站立 */
-            75%  { background-position-x: 100%; } /* 踏出右腳 */
-            100% { background-position-x: 50%; }  /* 站立 */
+        /* 將圖片與地板疊加，並分別設定尺寸，不再互相干擾 */
+        #board .cell.sprite-frostwolf {
+            background-image: url('02.png'), var(--bg-floor);
+            background-size: 300% 400%, cover;
+            background-repeat: no-repeat, no-repeat;
+        }
+        #board .cell.sprite-asmodan {
+            background-image: url('04.png'), var(--bg-floor);
+            background-size: 300% 400%, cover;
+            background-repeat: no-repeat, no-repeat;
         }
 
-        .walking::after {
-            animation: rpg-walk 0.6s infinite step-end;
+        /* 方向定位 (橫向 3 幀的中間站立幀是 50%) */
+        #board .face-down { background-position: 50% 0%, center; }
+        #board .face-left { background-position: 50% 33.33%, center; }
+        #board .face-right { background-position: 50% 66.66%, center; }
+        #board .face-up { background-position: 50% 100%, center; }
+
+        /* 行走動畫 (各方向獨立劇本，確保跨瀏覽器支援) */
+        @keyframes walk-down { 
+            0%, 50%, 100% { background-position: 50% 0%, center; } 
+            25% { background-position: 0% 0%, center; } 
+            75% { background-position: 100% 0%, center; } 
+        }
+        @keyframes walk-left { 
+            0%, 50%, 100% { background-position: 50% 33.33%, center; } 
+            25% { background-position: 0% 33.33%, center; } 
+            75% { background-position: 100% 33.33%, center; } 
+        }
+        @keyframes walk-right { 
+            0%, 50%, 100% { background-position: 50% 66.66%, center; } 
+            25% { background-position: 0% 66.66%, center; } 
+            75% { background-position: 100% 66.66%, center; } 
+        }
+        @keyframes walk-up { 
+            0%, 50%, 100% { background-position: 50% 100%, center; } 
+            25% { background-position: 0% 100%, center; } 
+            75% { background-position: 100% 100%, center; } 
         }
 
-        /* 碰裝狀態：隱藏角色，顯示爆炸 emoji */
-        .cell.sprite.collision::after { display: none; }
+        /* 觸發行走 */
+        #board .walking.face-down { animation: walk-down 0.6s infinite step-end; }
+        #board .walking.face-left { animation: walk-left 0.6s infinite step-end; }
+        #board .walking.face-right { animation: walk-right 0.6s infinite step-end; }
+        #board .walking.face-up { animation: walk-up 0.6s infinite step-end; }
+
+        /* 碰裝狀態：隱藏角色，顯示爆炸 emoji 與地板 */
         .cell.sprite.collision {
             color: #fff !important;
             font-size: 40px !important;
+            background-image: var(--bg-floor) !important;
         }
 
         /* === 主題材質設置 === */
@@ -204,6 +220,7 @@
                               var(--bg-floor);
             background-size: 65%, cover;
             background-position: center;
+            background-repeat: no-repeat, no-repeat; /* [修復] 防止酒桶重複貼上 */
         }
 
         /* 2：暴風城 */
@@ -216,6 +233,7 @@
                               var(--bg-floor);
             background-size: 65%, cover;
             background-position: center;
+            background-repeat: no-repeat, no-repeat; /* [修復] 防止石塊重複貼上 */
         }
 
         /* 3：北裂境 */
@@ -229,6 +247,7 @@
                               var(--bg-floor);
             background-size: 75%, cover;
             background-position: center bottom, center;
+            background-repeat: no-repeat, no-repeat; /* [修復] 防止枯樹重複貼上 */
         }
 
         /* 綠色邊框移動提示 */
@@ -453,7 +472,7 @@
             
             if (playerPos.r === aiPos.r && playerPos.c === aiPos.c) {
                 updatePortraitEmote('frostwolf', 'emote-wolf');
-                updatePortraitEmote('asmodan', 'emote-closed');
+                updatePortraitEmote('asmodan', 'emote-serious'); // [調整] 阿茲莫丹有點生氣的表情
                 endGame("抓到了！哈士奇的勝利！🎉", "#2ecc71");
                 return;
             }
@@ -469,9 +488,9 @@
             let validMoves = getValidMoves(aiPos);
             
             if (validMoves.length === 0) {
-                updatePortraitEmote('asmodan', 'emote-angry');
+                updatePortraitEmote('asmodan', 'emote-serious'); // [調整]
                 updatePortraitEmote('frostwolf', 'emote-wolf');
-                endGame("獵物被包圍，傲嬌貓認輸了！😎", "#2ecc71");
+                endGame("獵物被包圍，傲嬌貓不甘心！😎", "#2ecc71");
                 return;
             }
             
@@ -491,7 +510,7 @@
             aiPos = chosenMove;
             
             if (aiPos.r === playerPos.r && aiPos.c === playerPos.c) {
-                updatePortraitEmote('asmodan', 'emote-closed');
+                updatePortraitEmote('asmodan', 'emote-serious'); // [調整]
                 updatePortraitEmote('frostwolf', 'emote-wolf');
                 endGame("獵物自投羅網！哈士奇大勝！😎", "#2ecc71");
             } else {
