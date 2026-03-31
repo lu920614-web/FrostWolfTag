@@ -55,17 +55,15 @@
             flex-shrink: 0; 
         }
 
-        /* 利用虛擬圖層 (::before) 疊加上 SVG 項圈邊框 */
         .portrait-ui::before {
             content: '';
             position: absolute;
             top: -3px; left: -3px; right: -3px; bottom: -3px;
-            pointer-events: none; /* 讓點擊可以穿透 */
+            pointer-events: none;
             z-index: 5;
             background-size: 100% 100%;
         }
 
-        /* 名牌 UI (::after) */
         .portrait-ui::after {
             content: attr(data-name);
             position: absolute;
@@ -78,28 +76,26 @@
             font-weight: bold;
             white-space: nowrap;
             z-index: 10;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.9); /* 增強對比度 */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
         }
 
-        /* 🐺 霜狼：厚實灰銀狗狗項圈 (SVG) 與 灰色系名牌 */
         #portrait-frostwolf { background-image: url('01.png'); }
         #portrait-frostwolf::before {
             background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='3' y='3' width='94' height='94' rx='12' fill='none' stroke='%23556061' stroke-width='6'/><rect x='6' y='6' width='88' height='88' rx='9' fill='none' stroke='%232a2e2f' stroke-width='2'/><circle cx='10' cy='25' r='2' fill='%23bdc3c7'/><circle cx='10' cy='50' r='2' fill='%23bdc3c7'/><circle cx='10' cy='75' r='2' fill='%23bdc3c7'/><circle cx='90' cy='25' r='2' fill='%23bdc3c7'/><circle cx='90' cy='50' r='2' fill='%23bdc3c7'/><circle cx='90' cy='75' r='2' fill='%23bdc3c7'/><rect x='40' y='92' width='20' height='8' rx='2' fill='%2395a5a6'/><rect x='46' y='94' width='8' height='4' fill='%232c3e50'/></svg>");
         }
         #portrait-frostwolf::after { 
-            background: #2c3e50; /* 深灰藍底 */
-            color: #ecf0f1;      /* 亮銀白字 */
+            background: #2c3e50;
+            color: #ecf0f1;     
             border: 2px solid #556061; 
         }
 
-        /* 👾 阿茲莫丹：魔法褐色鈴鐺項圈 (SVG) 與 褐色系名牌 */
         #portrait-asmodan { background-image: url('03.png'); }
         #portrait-asmodan::before {
             background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='3' y='3' width='94' height='94' rx='12' fill='none' stroke='%235c3a21' stroke-width='6'/><rect x='3' y='3' width='94' height='94' rx='12' fill='none' stroke='%23d35400' stroke-width='1.5' stroke-dasharray='4 4'/><circle cx='50' cy='95' r='8' fill='%23f1c40f'/><circle cx='50' cy='96' r='2' fill='%238e44ad'/><line x1='47' y1='100' x2='53' y2='100' stroke='%238b4513' stroke-width='1'/></svg>");
         }
         #portrait-asmodan::after { 
-            background: #4a2311; /* 深褐皮底 */
-            color: #f39c12;      /* 亮金黃字 */
+            background: #4a2311;
+            color: #f39c12;     
             border: 2px solid #8b4513; 
         }
 
@@ -138,7 +134,6 @@
             box-shadow: 0 0 10px rgba(241, 196, 15, 0.4);
             background-color: #2c3e50;
         }
-        /* 反灰未解鎖按鈕 */
         .controls button:disabled {
             background-color: #111;
             color: #444;
@@ -289,6 +284,73 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
             text-align: center;
         }
+
+        /* === 通關 CG 彈窗 ================= */
+        #cg-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        #cg-modal.hidden {
+            display: none !important;
+            opacity: 0;
+        }
+
+        .cg-content {
+            background-color: #2c2c2c;
+            border: 4px solid #d4af37;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            max-width: 90%;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #cg-image {
+            max-width: 100%;
+            max-height: 65vh;
+            border-radius: 4px;
+            object-fit: contain;
+            margin-bottom: 20px;
+        }
+
+        #cg-text {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px #000000;
+        }
+
+        #cg-btn {
+            background-color: #d4af37;
+            color: #000;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 10px 40px;
+            border: 2px solid #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        #cg-btn:hover {
+            background-color: #e6c249;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
@@ -308,6 +370,14 @@
 
     <div id="board"></div>
     <div id="msg">載入中...</div>
+
+    <div id="cg-modal" class="hidden">
+        <div class="cg-content">
+            <img id="cg-image" src="" alt="Level Complete CG">
+            <p id="cg-text"></p>
+            <button id="cg-btn" onclick="closeCGModal()">確認</button>
+        </div>
+    </div>
 
     <script>
         const boardElement = document.getElementById('board');
@@ -581,28 +651,58 @@
             }
         }
 
-        // [重點] 遊戲結束判定與進度解鎖
+        // [重點更新] 遊戲結束判定與進度解鎖、彈窗呼叫
         function endGame(msg, color, isWin = false) {
             gameOver = true;
             msgElement.innerText = msg;
             msgElement.style.color = color;
             
-            if (isWin) {
-                // 如果在酒館獲勝，解鎖暴風城
-                if (currentTheme === 'tavern' && unlockedLevel < 2) {
-                    unlockedLevel = 2;
-                    document.getElementById('btn-stormwind').disabled = false;
-                    setTimeout(() => alert("🎉 恭喜！解鎖第二關【暗夜暴風城】！"), 300);
-                } 
-                // 如果在暴風城獲勝，解鎖北裂境
-                else if (currentTheme === 'stormwind' && unlockedLevel < 3) {
-                    unlockedLevel = 3;
-                    document.getElementById('btn-northrend').disabled = false;
-                    setTimeout(() => alert("🎉 恭喜！解鎖最終關卡【前往北裂境】！"), 300);
-                }
-            }
-            
+            // 確保最後一次移動被畫出來
             drawBoard();
+
+            if (isWin) {
+                const cgModal = document.getElementById('cg-modal');
+                const cgImage = document.getElementById('cg-image');
+                const cgText = document.getElementById('cg-text');
+                const cgBtn = document.getElementById('cg-btn');
+
+                // 判斷當前關卡並設定對應的圖片與文字
+                if (currentTheme === 'tavern') {
+                    // 解鎖下一關邏輯
+                    if (unlockedLevel < 2) {
+                        unlockedLevel = 2;
+                        document.getElementById('btn-stormwind').disabled = false;
+                    }
+                    cgImage.src = '05.webp';
+                    cgText.innerText = '抓到阿茲莫丹了！新的關卡已經開啟！';
+                    cgBtn.innerText = '繼續';
+
+                } else if (currentTheme === 'stormwind') {
+                    // 解鎖下一關邏輯
+                    if (unlockedLevel < 3) {
+                        unlockedLevel = 3;
+                        document.getElementById('btn-northrend').disabled = false;
+                    }
+                    cgImage.src = '06.webp';
+                    cgText.innerText = '抓到阿茲莫丹了！新的關卡已經開啟！';
+                    cgBtn.innerText = '繼續';
+
+                } else if (currentTheme === 'northrend') {
+                    cgImage.src = '07.webp';
+                    cgText.innerText = '抓到阿茲莫丹了！';
+                    cgBtn.innerText = '完成遊戲';
+                }
+
+                // 稍微延遲彈窗，讓玩家看清楚最後的相撞特效
+                setTimeout(() => {
+                    cgModal.classList.remove('hidden');
+                }, 400);
+            }
+        }
+
+        // 關閉 CG 彈窗的函數
+        function closeCGModal() {
+            document.getElementById('cg-modal').classList.add('hidden');
         }
 
         initGame(5, 4, 0.18, 'tavern');
