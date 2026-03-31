@@ -149,66 +149,46 @@
         }
 
         /* =========================================
-           [終極修復] 3x5 精靈圖層對應設置
+           [絕對無敵版] 座標級精靈圖切割系統
            ========================================= */
         .character-sprite {
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            /* 這裡修改為 500% 高度，因為你的圖有 5 排！ */
-            background-size: 300% 500%; 
+            width: 80px;  /* 嚴格鎖死與格子同寬 */
+            height: 80px; /* 嚴格鎖死與格子同高 */
+            
+            /* 將 12x8 的圖紙強制轉換為像素座標：寬 960px (12*80), 高 640px (8*80) */
+            background-size: 960px 640px; 
             background-repeat: no-repeat;
             pointer-events: none; 
             z-index: 10;
-            image-rendering: pixelated; /* 讓像素圖保持邊緣銳利 */
+            image-rendering: pixelated; /* 讓像素邊緣完美銳利 */
+            
+            /* 預設的 X 座標：停留在中間(站立)的那一格 */
+            background-position-x: -80px; 
         }
 
         .sprite-frostwolf { background-image: url('02.png'); }
         .sprite-asmodan { background-image: url('04.png'); }
 
-        /* Y軸定位 (總高度為 100%，除以 4 個間隔 = 0, 25, 50, 75, 100) */
-        /* 第一列：往下 | 第二列：往左 | 第三列：往右 | 第四列：往上 */
-        .face-down { background-position: 50% 0%; }
-        .face-left { background-position: 50% 25%; }
-        .face-right { background-position: 50% 50%; }
-        .face-up { background-position: 50% 75%; }
+        /* Y 軸方向：對應 RPGMaker 的 1到4排 (每排往下推 80px) */
+        .face-down  { background-position-y: 0px; }
+        .face-left  { background-position-y: -80px; }
+        .face-right { background-position-y: -160px; }
+        .face-up    { background-position-y: -240px; }
 
-        /* 動畫劇本更新 Y 軸百分比 */
-        @keyframes walk-down { 
-            0% { background-position: 50% 0%; } 
-            25% { background-position: 0% 0%; } 
-            50% { background-position: 50% 0%; } 
-            75% { background-position: 100% 0%; } 
-            100% { background-position: 50% 0%; } 
-        }
-        @keyframes walk-left { 
-            0% { background-position: 50% 25%; } 
-            25% { background-position: 0% 25%; } 
-            50% { background-position: 50% 25%; } 
-            75% { background-position: 100% 25%; } 
-            100% { background-position: 50% 25%; } 
-        }
-        @keyframes walk-right { 
-            0% { background-position: 50% 50%; } 
-            25% { background-position: 0% 50%; } 
-            50% { background-position: 50% 50%; } 
-            75% { background-position: 100% 50%; } 
-            100% { background-position: 50% 50%; } 
-        }
-        @keyframes walk-up { 
-            0% { background-position: 50% 75%; } 
-            25% { background-position: 0% 75%; } 
-            50% { background-position: 50% 75%; } 
-            75% { background-position: 100% 75%; } 
-            100% { background-position: 50% 75%; } 
+        /* X 軸動畫：站立(中:-80px) -> 踏腳(左:0px) -> 站立(中:-80px) -> 踏腳(右:-160px) */
+        @keyframes walk-cycle {
+            0%   { background-position-x: -80px; } 
+            25%  { background-position-x: 0px; }   
+            50%  { background-position-x: -80px; } 
+            75%  { background-position-x: -160px; } 
+            100% { background-position-x: -80px; } 
         }
 
-        .walking.face-down { animation: walk-down 0.6s infinite step-end; }
-        .walking.face-left { animation: walk-left 0.6s infinite step-end; }
-        .walking.face-right { animation: walk-right 0.6s infinite step-end; }
-        .walking.face-up { animation: walk-up 0.6s infinite step-end; }
+        /* 綁定動畫：因為我們已經拆分了 X 軸和 Y 軸，所有方向都可以共用同一個走路腳本！ */
+        .walking { animation: walk-cycle 0.6s infinite step-end; }
 
         /* 碰裝爆炸圖示 */
         .collision-emoji {
@@ -352,7 +332,7 @@
         }
 
         function updatePortraitEmote(char, emoteClass) {
-            const el = char === 'frostwolf' ? uiFrostwolf : uiAsmodan;
+            const el = char === char === 'frostwolf' ? uiFrostwolf : uiAsmodan;
             el.className = el.className.replace(/\bemote-\S+/g, '');
             el.classList.add(emoteClass);
         }
@@ -447,6 +427,11 @@
                     boardElement.appendChild(cell);
                 }
             }
+        }
+
+        function getCellElement(r, c) {
+            let index = r * cols + c;
+            return boardElement.children[index];
         }
 
         function playerTurn(r, c) {
