@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>霜狼鬼抓人 - 阿茲莫丹降臨</title>
+    <title>霜狼鬼抓人 2.0 - 北裂境風暴</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #121212; 
+            background-color: #080808; /* 更黑的背景增強迷霧感 */
             color: #ecf0f1;
             margin: 0;
-            padding-top: 20px;
+            padding-top: 15px;
             min-height: 100vh;
         }
 
@@ -22,10 +22,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 30px;
+            gap: 25px;
             width: 100%;
-            max-width: 800px;
-            margin-bottom: 20px;
+            max-width: 900px;
+            margin-bottom: 15px;
         }
 
         .title-area {
@@ -35,8 +35,8 @@
         }
 
         h1 { 
-            margin: 0 0 15px 0; 
-            font-size: 32px;
+            margin: 0 0 10px 0; 
+            font-size: 28px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
             color: #f1c40f; 
             text-align: center;
@@ -45,8 +45,8 @@
         /* === 頭像 UI 設置 === */
         .portrait-ui {
             position: relative;
-            width: 100px;
-            height: 100px;
+            width: 90px;
+            height: 90px;
             border-radius: 12px;
             background-size: 400% 200%; 
             background-repeat: no-repeat;
@@ -58,30 +58,22 @@
         .portrait-ui::after {
             content: attr(data-name);
             position: absolute;
-            bottom: -22px;
+            bottom: -20px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0,0,0,0.8);
-            padding: 2px 8px;
+            padding: 1px 6px;
             border-radius: 4px;
-            font-size: 13px;
-            font-weight: bold;
+            font-size: 12px;
             white-space: nowrap;
         }
 
-        #portrait-frostwolf {
-            background-image: url('01.png');
-            border-color: #f1c40f; 
-        }
+        #portrait-frostwolf { background-image: url('01.png'); border-color: #f1c40f; }
         #portrait-frostwolf::after { color: #f1c40f; }
-
-        #portrait-asmodan {
-            background-image: url('03.png');
-            border-color: #3498db; 
-        }
+        #portrait-asmodan { background-image: url('03.png'); border-color: #3498db; }
         #portrait-asmodan::after { color: #3498db; }
 
-        /* 頭像表情定位 */
+        /* 頭像表情定位 (維持原有) */
         .emote-smile { background-position: 0% 0%; }         
         .emote-serious { background-position: 33.33% 0%; }   
         .emote-cry { background-position: 66.66% 0%; }       
@@ -95,18 +87,18 @@
         /* === UI 按鈕設定 === */
         .controls {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
             justify-content: center;
         }
         .controls button {
-            padding: 8px 14px;
-            font-size: 14px;
+            padding: 6px 12px;
+            font-size: 13px;
             font-weight: bold;
             color: #95a5a6;
-            background-color: #2c3e50;
-            border: 2px solid #1a252f;
-            border-radius: 8px;
+            background-color: #1a252f;
+            border: 2px solid #080808;
+            border-radius: 6px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
@@ -115,90 +107,120 @@
             color: #fff;
             border: 2px solid #f1c40f;
             box-shadow: 0 0 10px rgba(241, 196, 15, 0.4);
-            background-color: #34495e;
+            background-color: #2c3e50;
         }
 
         @media (max-width: 600px) {
-            .header-hud { gap: 10px; }
-            .portrait-ui { width: 75px; height: 75px; } 
-            h1 { font-size: 24px; }
+            .header-hud { gap: 8px; flex-direction: column; }
+            .portrait-ui { width: 70px; height: 70px; } 
+            h1 { font-size: 20px; }
+            .controls button { font-size: 12px; padding: 5px 10px; }
         }
         
         /* === 遊戲盤面設定 === */
         #board {
             display: grid;
-            grid-gap: 4px;
-            background-color: #111;
-            padding: 12px;
+            grid-gap: 3px; /* 縮小格距看起來更精緻 */
+            background-color: #000;
+            padding: 8px;
             border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            transition: background-color 0.5s;
-            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+            margin-bottom: 15px;
+            border: 2px solid rgba(255,255,255,0.05);
         }
 
         .cell {
-            width: 80px;
-            height: 80px;
+            width: 70px; /* 整體放大地圖，格子稍微縮小點 */
+            height: 70px;
             border-radius: 4px;
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
-            box-shadow: inset 0 0 8px rgba(0,0,0,0.4);
             overflow: hidden; 
+            transition: filter 0.3s, background-color 0.3s;
         }
 
         /* =========================================
-           [絕對無敵版] 座標級精靈圖切割系統
+           [重點] 精靈圖 90% 縮小化與像素優化
            ========================================= */
         .character-sprite {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 80px;  /* 嚴格鎖死與格子同寬 */
-            height: 80px; /* 嚴格鎖死與格子同高 */
+            /* 將精靈圖鎖死為格子的 90% */
+            width: 90%;
+            height: 90%;
             
-            /* 將 12x8 的圖紙強制轉換為像素座標：寬 960px (12*80), 高 640px (8*80) */
-            background-size: 960px 640px; 
+            /* [修復] 針對 12x8 標準圖紙，以格子 90%(63px) 為單位的座標系 */
+            background-size: 756px 504px; /* 12*63, 8*63 */
             background-repeat: no-repeat;
             pointer-events: none; 
             z-index: 10;
-            image-rendering: pixelated; /* 讓像素邊緣完美銳利 */
+            image-rendering: pixelated; /* 完美像素邊緣 */
             
-            /* 預設的 X 座標：停留在中間(站立)的那一格 */
-            background-position-x: -80px; 
+            /* 預設靜止幀(中)在 -63px (1*63) */
+            background-position-x: -63px; 
+            
+            /* 水平居中 */
+            left: 50%;
+            transform: translateX(-50%);
         }
 
         .sprite-frostwolf { background-image: url('02.png'); }
         .sprite-asmodan { background-image: url('04.png'); }
 
-        /* Y 軸方向：對應 RPGMaker 的 1到4排 (每排往下推 80px) */
+        /* Y軸方向：每排往下推 63px */
         .face-down  { background-position-y: 0px; }
-        .face-left  { background-position-y: -80px; }
-        .face-right { background-position-y: -160px; }
-        .face-up    { background-position-y: -240px; }
+        .face-left  { background-position-y: -63px; }
+        .face-right { background-position-y: -126px; }
+        .face-up    { background-position-y: -189px; }
 
-        /* X 軸動畫：站立(中:-80px) -> 踏腳(左:0px) -> 站立(中:-80px) -> 踏腳(右:-160px) */
+        /* 行走動畫劇本 (使用像素座標) */
         @keyframes walk-cycle {
-            0%   { background-position-x: -80px; } 
+            0%   { background-position-x: -63px; } 
             25%  { background-position-x: 0px; }   
-            50%  { background-position-x: -80px; } 
-            75%  { background-position-x: -160px; } 
-            100% { background-position-x: -80px; } 
+            50%  { background-position-x: -63px; } 
+            75%  { background-position-x: -126px; } 
+            100% { background-position-x: -63px; } 
         }
 
-        /* 綁定動畫：因為我們已經拆分了 X 軸和 Y 軸，所有方向都可以共用同一個走路腳本！ */
         .walking { animation: walk-cycle 0.6s infinite step-end; }
+
+        /* =========================================
+           [全新重構] 戰爭迷霧 (Fog of War) 系統
+           ========================================= */
+        
+        /* 1. 未探索區域 (黑霧)：純黑、無背景 */
+        .cell.unexplored {
+            background-color: #000 !important;
+            background-image: none !important;
+        }
+        /* 隱藏黑霧內的任何精靈、爆炸、或移動提示 */
+        .cell.unexplored * { display: none !important; }
+
+        /* 2. 已探索但視野外 (灰霧)：暗色、無角色 */
+        .cell.explored {
+            filter: brightness(0.2) contrast(1.2); /* 強烈變暗 */
+        }
+        /* 強制隱藏灰霧內的阿茲莫丹精靈和爆炸 */
+        .cell.explored .sprite-asmodan,
+        .cell.explored .collision-emoji { display: none !important; }
+        /* 霜狼依然可見(但會被變暗) */
+        .cell.explored .sprite-frostwolf { display: block !important; }
+
+        /* 3. 視野內 (亮區)：正常顯示 */
+        .cell.visible {
+            filter: brightness(1) contrast(1); /* 恢復正常 */
+        }
 
         /* 碰裝爆炸圖示 */
         .collision-emoji {
-            font-size: 40px;
+            font-size: 35px;
             color: #fff;
             z-index: 20;
             position: relative;
         }
 
-        /* === 主題材質設置 === */
+        /* === 主題材質設置 (維持重複貼圖防護) === */
         /* 1：酒館 */
         .cell.floor-tavern {
             background-color: #9c5b2b;
@@ -207,7 +229,7 @@
         .cell.floor-tavern.obstacle {
             background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><rect x='3' y='2' width='6' height='8' fill='%23b06221'/><rect x='2' y='3' width='8' height='6' fill='%23b06221'/><rect x='3' y='2' width='4' height='1' fill='%23d99c68'/><rect x='2' y='3' width='1' height='3' fill='%23d99c68'/><rect x='6' y='9' width='3' height='1' fill='%23522b11'/><rect x='9' y='5' width='1' height='4' fill='%23522b11'/><rect x='2' y='3' width='8' height='1' fill='%23000'/><rect x='2' y='8' width='8' height='1' fill='%23000'/><rect x='5' y='2' width='1' height='8' fill='%233d210d'/><rect x='8' y='2' width='1' height='8' fill='%233d210d'/></svg>"), 
                               url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'><rect width='80' height='80' fill='%23a6683c'/><rect y='20' width='80' height='20' fill='%2391562e'/><rect y='60' width='80' height='20' fill='%23804a26'/><path d='M0 20h80M0 40h80M0 60h80' stroke='%23573016' stroke-width='2'/></svg>");
-            background-size: 65%, auto; 
+            background-size: 60%, auto; 
             background-position: center;
             background-repeat: no-repeat, repeat; 
         }
@@ -242,16 +264,16 @@
         /* 綠色邊框移動提示 */
         .highlight {
             cursor: pointer;
-            box-shadow: inset 0 0 0 5px #2ecc71, inset 0 0 15px rgba(46, 204, 113, 0.3) !important;
+            box-shadow: inset 0 0 0 5px #2ecc71, inset 0 0 20px rgba(46, 204, 113, 0.4) !important;
             z-index: 20;
         }
         .highlight:hover {
-            box-shadow: inset 0 0 0 6px #2ecc71, inset 0 0 25px rgba(46, 204, 113, 0.5) !important;
+            box-shadow: inset 0 0 0 6px #2ecc71, inset 0 0 30px rgba(46, 204, 113, 0.6) !important;
             transform: scale(0.95);
         }
         
         #msg {
-            font-size: 20px;
+            font-size: 19px;
             font-weight: bold;
             height: 30px;
             color: #f39c12;
@@ -265,11 +287,11 @@
     <div class="header-hud">
         <div id="portrait-frostwolf" class="portrait-ui" data-name="霜狼"></div>
         <div class="title-area">
-            <h1>霜狼鬼抓人</h1>
+            <h1>霜狼鬼抓人 2.0</h1>
             <div class="controls">
-                <button id="btn-tavern" onclick="initGame(4, 3, 0.15, 'tavern')">鮑伯的酒館</button>
-                <button id="btn-stormwind" onclick="initGame(4, 4, 0.20, 'stormwind')">暴風城黑夜</button>
-                <button id="btn-northrend" onclick="initGame(5, 4, 0.25, 'northrend')">前往北裂境</button>
+                <button id="btn-tavern" onclick="initGame(5, 4, 0.18, 'tavern')">酒館燈滅 (5x4)</button>
+                <button id="btn-stormwind" onclick="initGame(6, 5, 0.23, 'stormwind')">暴風城暗巷 (6x5)</button>
+                <button id="btn-northrend" onclick="initGame(8, 7, 0.28, 'northrend')">北裂境風暴 (8x7)</button>
             </div>
         </div>
         <div id="portrait-asmodan" class="portrait-ui" data-name="阿茲莫丹"></div>
@@ -288,13 +310,16 @@
         let cols, rows, rockDensity, currentTheme;
         let playerPos, aiPos, rocks, gameOver;
         
+        // 戰爭迷霧地圖狀態 (0=未探索, 1=探索外, 2=視野內)
+        let fogOfWarMap = [];
+
         let playerFaceDir = 'face-down';
         let aiFaceDir = 'face-down';
 
         function initGame(c, r, density, theme) {
             cols = c;
             rows = r;
-            rockDensity = density;
+            rockDensity = density; // 這裡使用了稍微增加過的隨機障礙密度
             currentTheme = theme;
             playerPos = { r: 0, c: 0 };
             aiPos = { r: rows - 1, c: cols - 1 };
@@ -309,20 +334,25 @@
             document.querySelectorAll('.controls button').forEach(btn => btn.classList.remove('active'));
             document.getElementById('btn-' + theme).classList.add('active');
             
-            boardElement.style.gridTemplateColumns = `repeat(${cols}, 80px)`;
+            boardElement.style.gridTemplateColumns = `repeat(${cols}, 70px)`;
 
             generateMap();
             
+            // 初始化全黑的迷霧地圖
+            fogOfWarMap = Array(rows).fill().map(() => Array(cols).fill(0));
+            // 計算初始視野
+            updateFogOfWar();
+
             if (theme === 'tavern') {
-                msgElement.innerText = "酒館裡，霜狼哈士奇咬著尾巴出現了！";
+                msgElement.innerText = "酒館熄燈了，霜狼只能靠嗅覺探路...";
                 msgElement.style.color = "#f39c12"; 
                 updatePortraitEmote('asmodan', 'emote-pout');
             } else if (theme === 'stormwind') {
-                msgElement.innerText = "黑夜暗巷，貓咪法師阿茲莫丹哼了一聲...";
+                msgElement.innerText = "暴風城暗巷，阿茲莫丹的眼睛在黑暗中閃爍...";
                 msgElement.style.color = "#3498db"; 
                 updatePortraitEmote('asmodan', 'emote-angry');
             } else if (theme === 'northrend') {
-                msgElement.innerText = "冰天雪地，霜狼興奮狼嚎，貓咪則瑟瑟發抖...";
+                msgElement.innerText = "白茫茫的風暴，除了寒冷，你看不到任何東西...";
                 msgElement.style.color = "#ecf0f1"; 
                 updatePortraitEmote('asmodan', 'emote-cry');
                 updatePortraitEmote('frostwolf', 'emote-talk');
@@ -332,7 +362,7 @@
         }
 
         function updatePortraitEmote(char, emoteClass) {
-            const el = char === char === 'frostwolf' ? uiFrostwolf : uiAsmodan;
+            const el = char === 'frostwolf' ? uiFrostwolf : uiAsmodan;
             el.className = el.className.replace(/\bemote-\S+/g, '');
             el.classList.add(emoteClass);
         }
@@ -345,6 +375,7 @@
                 while (rocks.length < numRocks) {
                     let r = Math.floor(Math.random() * rows);
                     let c = Math.floor(Math.random() * cols);
+                    // 確保起點和對角線終點不生成石頭
                     if ((r === 0 && c === 0) || (r === rows - 1 && c === cols - 1)) continue;
                     if (!rocks.some(rock => rock.r === r && rock.c === c)) rocks.push({ r, c });
                 }
@@ -390,6 +421,34 @@
             return 'face-down'; 
         }
 
+        // =========================================
+        // [NEW] 核心迷霧邏輯：計算曼哈頓距離 <= 2
+        // =========================================
+        function updateFogOfWar() {
+            // 先將原本的 2 (視野內) 降級為 1 (探索外)
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (fogOfWarMap[r][c] === 2) fogOfWarMap[r][c] = 1;
+                }
+            }
+
+            // 計算霜狼周圍的菱形範圍
+            const radius = 2;
+            for (let dr = -radius; dr <= radius; dr++) {
+                for (let dc = -radius; dc <= radius; dc++) {
+                    // 曼哈頓距離公式：|dr| + |dc|
+                    if (Math.abs(dr) + Math.abs(dc) <= radius) {
+                        let nr = playerPos.r + dr;
+                        let nc = playerPos.c + dc;
+                        // 如果在邊界內，升級為 2 (視野內)
+                        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+                            fogOfWarMap[nr][nc] = 2;
+                        }
+                    }
+                }
+            }
+        }
+
         function drawBoard() {
             boardElement.innerHTML = '';
             let validPlayerMoves = gameOver ? [] : getValidMoves(playerPos);
@@ -398,6 +457,12 @@
                 for (let c = 0; c < cols; c++) {
                     let cell = document.createElement('div');
                     cell.classList.add('cell', `floor-${currentTheme}`);
+
+                    // 1. 應用迷霧 CSS 類
+                    const fogState = fogOfWarMap[r][c];
+                    if (fogState === 0) cell.classList.add('unexplored');
+                    else if (fogState === 1) cell.classList.add('explored');
+                    else if (fogState === 2) cell.classList.add('visible');
 
                     let hasPlayer = (playerPos.r === r && playerPos.c === c);
                     let hasAI = (aiPos.r === r && aiPos.c === c);
@@ -410,14 +475,17 @@
                     } else if (hasPlayer && hasAI) {
                         contentHtml = '<div class="collision-emoji">💥</div>';
                     } else if (hasPlayer) {
+                        // 霜狼精靈圖
                         contentHtml = `<div class="character-sprite sprite-frostwolf ${playerFaceDir} walking"></div>`;
-                    } else if (hasAI) {
+                    } else if (hasAI && fogState === 2) {
+                        // 阿茲莫丹精靈圖：[重點] 只有在視野內(fogState===2)才顯示
                         contentHtml = `<div class="character-sprite sprite-asmodan ${aiFaceDir} walking"></div>`;
                     }
 
                     cell.innerHTML = contentHtml;
 
-                    if (!gameOver && !hasPlayer && !hasRock) {
+                    // 2. 移動提示 logic：只有探索過的格子(explored 或 visible)才顯示提示
+                    if (!gameOver && !hasPlayer && !hasRock && fogState !== 0) {
                         let isMovable = validPlayerMoves.some(m => m.r === r && m.c === c);
                         if (isMovable) {
                             cell.classList.add('highlight');
@@ -443,12 +511,17 @@
             
             playerPos = { r: r, c: c };
             
+            // 抓到人之前的判斷需在更新迷霧前，因為碰裝時雙方皆需可見
             if (playerPos.r === aiPos.r && playerPos.c === aiPos.c) {
+                // 獲勝表情不變
                 updatePortraitEmote('frostwolf', 'emote-wolf');
                 updatePortraitEmote('asmodan', 'emote-serious'); 
                 endGame("抓到了！哈士奇的勝利！🎉", "#2ecc71");
                 return;
             }
+            
+            // [重点] 先更新迷霧數據，再重繪
+            updateFogOfWar();
             
             if (currentTheme !== 'northrend') updatePortraitEmote('asmodan', 'emote-pout');
 
@@ -463,10 +536,11 @@
             if (validMoves.length === 0) {
                 updatePortraitEmote('asmodan', 'emote-serious'); 
                 updatePortraitEmote('frostwolf', 'emote-wolf');
-                endGame("獵物被包圍，傲嬌貓不甘心！😎", "#2ecc71");
+                endGame("獵物不甘心認輸了！😎", "#2ecc71");
                 return;
             }
             
+            // AI 邏輯不變，依舊擁有全圖視角尋找最遠距離
             let maxDist = -1, bestMoves = [];
             validMoves.forEach(move => {
                 let dist = Math.abs(move.r - playerPos.r) + Math.abs(move.c - playerPos.c);
@@ -487,8 +561,8 @@
                 updatePortraitEmote('frostwolf', 'emote-wolf');
                 endGame("獵物自投羅網！哈士奇大勝！😎", "#2ecc71");
             } else {
-                if (currentTheme === 'tavern') msgElement.innerText = "霜狼舔舔嘴巴...（你的回合）";
-                else if (currentTheme === 'stormwind') msgElement.innerText = "阿茲莫丹飛快逃竄...（你的回合）";
+                if (currentTheme === 'tavern') msgElement.innerText = "黑暗中傳來木桶碰撞聲...（你的回合）";
+                else if (currentTheme === 'stormwind') msgElement.innerText = "傲嬌貓飛快逃竄...（你的回合）";
                 else if (currentTheme === 'northrend') {
                     msgElement.innerText = "呼呼... 好冷...（你的回合）";
                     updatePortraitEmote('asmodan', 'emote-cry'); 
@@ -504,7 +578,8 @@
             drawBoard();
         }
 
-        initGame(4, 3, 0.15, 'tavern');
+        // 啟動酒館
+        initGame(5, 4, 0.18, 'tavern');
     </script>
 </body>
 </html>
