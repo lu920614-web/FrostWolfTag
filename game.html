@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>霜狼鬼抓人</title>
     <style>
-        /* === 加入全局格子大小變數 === */
+        /* === 加入全局格子大小與人物縮放變數 === */
         :root {
             --cell-size: 70px;
+            --sprite-scale: 1; /* 預設不縮放 */
         }
 
         body {
@@ -147,7 +148,6 @@
             box-shadow: none;
         }
 
-        /* === 重製手機版優化 (解決標題重疊問題) === */
         @media (max-width: 600px) {
             .header-hud { 
                 gap: 10px; 
@@ -199,7 +199,6 @@
         }
 
         .cell {
-            /* 使用 CSS 變數控制大小，方便 JS 動態調整 */
             width: var(--cell-size); 
             height: var(--cell-size);
             border-radius: 4px;
@@ -211,18 +210,22 @@
             transition: filter 0.3s, background-color 0.3s;
         }
 
+        /* [縮小燈大法核心] 固定像素並套用縮放變數 */
         .character-sprite {
             position: absolute;
-            width: 90%;
-            height: 90%;
+            width: 63px;  /* 鎖定原始圖片的一格寬度 */
+            height: 63px; /* 鎖定原始圖片的一格高度 */
             background-size: 756px 504px; 
             background-repeat: no-repeat;
             pointer-events: none; 
             z-index: 10;
             image-rendering: pixelated; 
             background-position-x: -63px; 
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
+            /* 同時做到絕對置中與比例縮放 */
+            transform: translate(-50%, -50%) scale(var(--sprite-scale));
+            transform-origin: center center;
         }
 
         .sprite-frostwolf { background-image: url('02.png'); }
@@ -259,13 +262,12 @@
         .cell.visible { filter: brightness(1) contrast(1); }
 
         .collision-emoji {
-            font-size: calc(var(--cell-size) * 0.5); /* 隨著格子大小等比縮放 */
+            font-size: calc(var(--cell-size) * 0.5); 
             color: #fff;
             z-index: 20;
             position: relative;
         }
 
-        /* 主題材質設置 (省略) */
         .cell.floor-tavern {
             background-color: #9c5b2b;
             background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'><rect width='80' height='80' fill='%23a6683c'/><rect y='20' width='80' height='20' fill='%2391562e'/><rect y='60' width='80' height='20' fill='%23804a26'/><path d='M0 20h80M0 40h80M0 60h80' stroke='%23573016' stroke-width='2'/></svg>");
@@ -432,7 +434,7 @@
         let playerFaceDir = 'face-down';
         let aiFaceDir = 'face-down';
 
-        // 動態計算並套用最適合的格子尺寸
+        // 動態計算並套用最適合的格子尺寸，同時計算人物縮放比例
         function applyDynamicCellSize(c) {
             let screenW = window.innerWidth;
             let maxCellSize = 70; // 電腦版的標準大尺寸
@@ -444,7 +446,12 @@
                 maxCellSize = Math.min(70, calculatedSize);
             }
             
+            // 計算人物圖層的縮放比例 (基於標準的 70px 格子)
+            let scaleRatio = maxCellSize / 70;
+            
+            // 將計算結果寫入 CSS 變數
             document.documentElement.style.setProperty('--cell-size', `${maxCellSize}px`);
+            document.documentElement.style.setProperty('--sprite-scale', scaleRatio);
             boardElement.style.gridTemplateColumns = `repeat(${c}, var(--cell-size))`;
         }
 
