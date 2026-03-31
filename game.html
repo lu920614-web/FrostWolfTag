@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>霜狼鬼抓人</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #121212; 
+            color: #ecf0f1;
+            margin-top: 30px;
+        }
+        h1 { 
+            margin-bottom: 20px; 
+            font-size: 36px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            color: #f1c40f; 
+        }
+        
+        /* === UI 按鈕設定 === */
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+        }
+        .controls button {
+            padding: 10px 18px;
+            font-size: 15px;
+            font-weight: bold;
+            color: #95a5a6;
+            background-color: #2c3e50;
+            border: 2px solid #1a252f;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .controls button:hover { 
+            color: #fff;
+            filter: brightness(1.2); 
+        }
+        .controls button.active {
+            color: #fff;
+            border: 2px solid #f1c40f;
+            box-shadow: 0 0 12px rgba(241, 196, 15, 0.4), inset 0 0 8px rgba(255,255,255,0.1);
+            background-color: #34495e;
+            transform: translateY(-2px);
+        }
+        
+        /* === 遊戲盤面設定 === */
+        #board {
+            display: grid;
+            grid-gap: 4px;
+            background-color: #111;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,0,0,0.5);
+            transition: background-color 0.5s;
+        }
+
+        .cell {
+            width: 80px;
+            height: 80px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            position: relative;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.4);
+            transition: all 0.3s;
+        }
+
+        /* =========================================
+           [重點] 霜狼角色與 01.png 頭像魔法切片
+           ========================================= */
+        /* 隱藏原本的 Emoji 字元，讓圖片背景顯現 */
+        .cell.character {
+            color: transparent; 
+            font-size: 0;
+            z-index: 5;
+            transition: transform 0.1s;
+        }
+
+        /* 載入本機端/同資料夾的 01.png */
+        .cell.char-frostwolf {
+            background-image: url('01.png'); 
+            /* 將 4x2 的圖片放大，讓格子只顯示單一頭像 */
+            background-size: 400% 200%; 
+            background-repeat: no-repeat;
+        }
+
+        /* 利用背景定位 (background-position) 來切換表情 */
+        .emote-smile { background-position: 0% 0%; }         /* 左上：自信笑 */
+        .emote-serious { background-position: 33.33% 0%; }   /* 上二：嚴肅 */
+        .emote-cry { background-position: 66.66% 0%; }       /* 上三：哭泣 */
+        .emote-angry { background-position: 100% 0%; }       /* 右上：咬牙切齒 */
+        .emote-wolf { background-position: 0% 100%; }        /* 左下：狼嚎剪影 */
+        .emote-laugh { background-position: 33.33% 100%; }   /* 下二：大笑 */
+        .emote-talk { background-position: 66.66% 100%; }    /* 下三：講話 */
+        .emote-closed { background-position: 100% 100%; }    /* 右下：閉眼 */
+
+
+        /* =========================================
+           主題 1：鮑伯的酒館 (橫木地板 + 金棕色酒桶)
+           ========================================= */
+        #board[data-theme="tavern"] .cell {
+            background-color: #9c5b2b;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'><rect width='80' height='80' fill='%23a6683c'/><rect y='20' width='80' height='20' fill='%2391562e'/><rect y='60' width='80' height='20' fill='%23804a26'/><path d='M0 20h80M0 40h80M0 60h80' stroke='%23573016' stroke-width='2'/></svg>");
+        }
+        #board[data-theme="tavern"] .cell.obstacle {
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><rect x='3' y='2' width='6' height='8' fill='%23b06221'/><rect x='2' y='3' width='8' height='6' fill='%23b06221'/><rect x='3' y='2' width='4' height='1' fill='%23d99c68'/><rect x='2' y='3' width='1' height='3' fill='%23d99c68'/><rect x='6' y='9' width='3' height='1' fill='%23522b11'/><rect x='9' y='5' width='1' height='4' fill='%23522b11'/><rect x='2' y='3' width='8' height='1' fill='%23000'/><rect x='2' y='8' width='8' height='1' fill='%23000'/><rect x='5' y='2' width='1' height='8' fill='%233d210d'/><rect x='8' y='2' width='1' height='8' fill='%233d210d'/></svg>"), 
+                              var(--bg-floor);
+            background-size: 65%, cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        /* =========================================
+           主題 2：暴風城黑夜 (石子路 + 像素石塊)
+           ========================================= */
+        #board[data-theme="stormwind"] .cell {
+            background-color: #1a252c;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect width='40' height='40' fill='%231a252c'/><rect x='2' y='2' width='16' height='16' rx='4' fill='%2334495e'/><rect x='20' y='4' width='16' height='12' rx='4' fill='%232c3e50'/><rect x='4' y='20' width='18' height='16' rx='4' fill='%233b5368'/><rect x='24' y='18' width='14' height='18' rx='5' fill='%232c3e50'/></svg>");
+        }
+        #board[data-theme="stormwind"] .cell.obstacle {
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><rect x='2' y='1' width='4' height='1' fill='%23777'/><rect x='1' y='2' width='6' height='4' fill='%23777'/><rect x='2' y='6' width='4' height='1' fill='%23777'/><rect x='2' y='2' width='2' height='1' fill='%23aaa'/><rect x='1' y='3' width='1' height='1' fill='%23aaa'/><rect x='5' y='4' width='2' height='2' fill='%23444'/><rect x='3' y='5' width='2' height='1' fill='%23444'/></svg>"), 
+                              var(--bg-floor);
+            background-size: 65%, cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        /* =========================================
+           主題 3：北裂境 (雪地 + 像素枯樹)
+           ========================================= */
+        #board[data-theme="northrend"] .cell {
+            background-color: #ecf0f1;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect width='40' height='40' fill='%23ecf0f1'/><rect x='8' y='12' width='3' height='2' fill='%23bdc3c7'/><rect x='25' y='6' width='4' height='3' fill='%23d5dbdb'/><rect x='5' y='28' width='5' height='2' fill='%23bdc3c7'/><rect x='28' y='25' width='3' height='3' fill='%23d5dbdb'/><rect x='18' y='32' width='2' height='2' fill='%23bdc3c7'/></svg>");
+            box-shadow: inset 0 0 12px rgba(189, 195, 199, 0.5);
+        }
+        #board[data-theme="northrend"] .cell.obstacle {
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='7' y='6' width='2' height='9' fill='%233e2723'/><rect x='5' y='14' width='2' height='1' fill='%233e2723'/><rect x='9' y='13' width='2' height='2' fill='%233e2723'/><rect x='5' y='6' width='2' height='2' fill='%233e2723'/><rect x='3' y='4' width='2' height='2' fill='%233e2723'/><rect x='9' y='5' width='2' height='2' fill='%233e2723'/><rect x='11' y='3' width='2' height='2' fill='%233e2723'/><rect x='7' y='2' width='2' height='4' fill='%233e2723'/><rect x='5' y='1' width='2' height='2' fill='%233e2723'/></svg>"), 
+                              var(--bg-floor);
+            background-size: 75%, cover;
+            background-repeat: no-repeat;
+            background-position: center bottom, center;
+        }
+        /* 確保北裂境的枯樹不會蓋住角色 */
+        #board[data-theme="northrend"] .cell.character { z-index: 10; }
+
+        /* === 綠色邊框移動提示 === */
+        .highlight {
+            cursor: pointer;
+            box-shadow: inset 0 0 0 5px #2ecc71, inset 0 0 15px rgba(46, 204, 113, 0.3) !important;
+            z-index: 2;
+        }
+        .highlight:hover {
+            box-shadow: inset 0 0 0 6px #2ecc71, inset 0 0 25px rgba(46, 204, 113, 0.5) !important;
+            transform: scale(0.95);
+        }
+        
+        #msg {
+            margin-top: 25px;
+            font-size: 22px;
+            font-weight: bold;
+            height: 35px;
+            color: #f39c12;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>霜狼鬼抓人</h1>
+    
+    <div class="controls">
+        <button id="btn-tavern" onclick="initGame(4, 3, 0.15, 'tavern')">鮑伯的酒館</button>
+        <button id="btn-stormwind" onclick="initGame(4, 4, 0.20, 'stormwind')">暴風城黑夜</button>
+        <button id="btn-northrend" onclick="initGame(5, 4, 0.25, 'northrend')">前往北裂境</button>
+    </div>
+
+    <div id="board" data-theme="tavern"></div>
+    <div id="msg">載入中...</div>
+
+    <script>
+        const boardElement = document.getElementById('board');
+        const msgElement = document.getElementById('msg');
+        
+        let cols, rows, rockDensity, currentTheme;
+        let playerPos, aiPos, rocks, gameOver;
+        
+        // 用變數記錄目前的表情狀態
+        let playerFace = 'emote-smile';
+        let aiFace = 'emote-serious';
+
+        function initGame(c, r, density, theme) {
+            cols = c;
+            rows = r;
+            rockDensity = density;
+            currentTheme = theme;
+            playerPos = { r: 0, c: 0 };
+            aiPos = { r: rows - 1, c: cols - 1 };
+            gameOver = false;
+            
+            // 重置表情
+            playerFace = 'emote-smile';
+            aiFace = 'emote-serious';
+            
+            document.querySelectorAll('.controls button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn-' + theme).classList.add('active');
+            
+            boardElement.style.gridTemplateColumns = `repeat(${cols}, 80px)`;
+            boardElement.setAttribute('data-theme', theme);
+
+            generateMap();
+            
+            if (theme === 'tavern') {
+                msgElement.innerText = "歡迎來到酒館，霜狼已伺機而動...";
+                msgElement.style.color = "#f39c12"; 
+            } else if (theme === 'stormwind') {
+                msgElement.innerText = "夜色降臨暴風城，小心暗巷...";
+                msgElement.style.color = "#3498db"; 
+            } else if (theme === 'northrend') {
+                msgElement.innerText = "寒風呼嘯... 獵物無處可逃！";
+                msgElement.style.color = "#ecf0f1"; 
+            }
+            
+            drawBoard();
+        }
+
+        function generateMap() {
+            let connected = false;
+            let numRocks = Math.floor(cols * rows * rockDensity);
+            while (!connected) {
+                rocks = [];
+                while (rocks.length < numRocks) {
+                    let r = Math.floor(Math.random() * rows);
+                    let c = Math.floor(Math.random() * cols);
+                    if ((r === 0 && c === 0) || (r === rows - 1 && c === cols - 1)) continue;
+                    if (!rocks.some(rock => rock.r === r && rock.c === c)) rocks.push({ r, c });
+                }
+                connected = checkConnection();
+            }
+        }
+
+        function checkConnection() {
+            let queue = [{ r: 0, c: 0 }];
+            let visited = new Set(['0,0']);
+            let dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+            while (queue.length > 0) {
+                let curr = queue.shift();
+                if (curr.r === rows - 1 && curr.c === cols - 1) return true;
+                for (let d of dirs) {
+                    let nr = curr.r + d[0], nc = curr.c + d[1];
+                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && !isRock(nr, nc)) {
+                        let key = `${nr},${nc}`;
+                        if (!visited.has(key)) { visited.add(key); queue.push({ r: nr, c: nc }); }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function isRock(r, c) { return rocks.some(rock => rock.r === r && rock.c === c); }
+
+        function getValidMoves(pos) {
+            let moves = [];
+            let dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+            for (let d of dirs) {
+                let nr = pos.r + d[0], nc = pos.c + d[1];
+                if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && !isRock(nr, nc)) moves.push({ r: nr, c: nc });
+            }
+            return moves;
+        }
+
+        function drawBoard() {
+            boardElement.innerHTML = '';
+            let validPlayerMoves = gameOver ? [] : getValidMoves(playerPos);
+
+            let floorBg = "";
+            if (currentTheme === 'tavern') {
+                floorBg = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'><rect width='80' height='80' fill='%23a6683c'/><rect y='20' width='80' height='20' fill='%2391562e'/><rect y='60' width='80' height='20' fill='%23804a26'/><path d='M0 20h80M0 40h80M0 60h80' stroke='%23573016' stroke-width='2'/></svg>\")";
+            } else if (currentTheme === 'stormwind') {
+                floorBg = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect width='40' height='40' fill='%231a252c'/><rect x='2' y='2' width='16' height='16' rx='4' fill='%2334495e'/><rect x='20' y='4' width='16' height='12' rx='4' fill='%232c3e50'/><rect x='4' y='20' width='18' height='16' rx='4' fill='%233b5368'/><rect x='24' y='18' width='14' height='18' rx='5' fill='%232c3e50'/></svg>\")";
+            } else if (currentTheme === 'northrend') {
+                floorBg = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect width='40' height='40' fill='%23ecf0f1'/><rect x='8' y='12' width='3' height='2' fill='%23bdc3c7'/><rect x='25' y='6' width='4' height='3' fill='%23d5dbdb'/><rect x='5' y='28' width='5' height='2' fill='%23bdc3c7'/><rect x='28' y='25' width='3' height='3' fill='%23d5dbdb'/><rect x='18' y='32' width='2' height='2' fill='%23bdc3c7'/></svg>\")";
+            }
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    let cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.style.setProperty('--bg-floor', floorBg);
+
+                    let hasPlayer = (playerPos.r === r && playerPos.c === c);
+                    let hasAI = (aiPos.r === r && aiPos.c === c);
+                    let hasRock = isRock(r, c);
+
+                    if (hasRock) {
+                        cell.classList.add('obstacle');
+                    } else if (hasPlayer && hasAI) {
+                        // 雙方在同一格 (玩家獲勝)，顯示玩家勝利表情 (狼嚎)
+                        cell.classList.add('character', 'char-frostwolf', playerFace);
+                        cell.innerText = '😎'; 
+                    } else if (hasPlayer) {
+                        // 玩家
+                        cell.classList.add('character', 'char-frostwolf', playerFace);
+                        cell.innerText = '😎'; 
+                    } else if (hasAI) {
+                        // AI 獵物
+                        cell.classList.add('character', 'char-frostwolf', aiFace);
+                        cell.innerText = '👾';
+                    }
+
+                    if (!gameOver && !hasPlayer && !hasRock) {
+                        let isMovable = validPlayerMoves.some(m => m.r === r && m.c === c);
+                        if (isMovable) {
+                            cell.classList.add('highlight');
+                            cell.onclick = () => playerTurn(r, c);
+                        }
+                    }
+                    boardElement.appendChild(cell);
+                }
+            }
+        }
+
+        function playerTurn(r, c) {
+            if (gameOver) return;
+            playerPos = { r: r, c: c };
+            
+            if (playerPos.r === aiPos.r && playerPos.c === aiPos.c) {
+                // 玩家主動抓到獵物，變身狼嚎！
+                playerFace = 'emote-wolf';
+                endGame("抓到了！霜狼獲勝！🎉", "#2ecc71");
+                return;
+            }
+            
+            drawBoard(); 
+            setTimeout(aiTurn, 300);
+        }
+
+        function aiTurn() {
+            if (gameOver) return;
+            let validMoves = getValidMoves(aiPos);
+            
+            if (validMoves.length === 0) {
+                // 獵物無路可走，玩家變身狼嚎！
+                playerFace = 'emote-wolf';
+                endGame("獵物無路可走，霜狼獲勝！😎", "#2ecc71");
+                return;
+            }
+            
+            let maxDist = -1, bestMoves = [];
+            validMoves.forEach(move => {
+                let dist = Math.abs(move.r - playerPos.r) + Math.abs(move.c - playerPos.c);
+                if (dist > maxDist) { maxDist = dist; bestMoves = [move]; }
+                else if (dist === maxDist) { bestMoves.push(move); }
+            });
+            
+            aiPos = bestMoves[Math.floor(Math.random() * bestMoves.length)];
+            
+            if (aiPos.r === playerPos.r && aiPos.c === playerPos.c) {
+                // 獵物被迫自投羅網，玩家變身狼嚎！
+                playerFace = 'emote-wolf';
+                endGame("獵物自投羅網！霜狼獲勝！😎", "#2ecc71");
+            } else {
+                if (currentTheme === 'tavern') msgElement.innerText = "你的回合！";
+                else if (currentTheme === 'stormwind') msgElement.innerText = "暗處傳來腳步聲...";
+                else if (currentTheme === 'northrend') msgElement.innerText = "雪地留下了足跡...";
+                drawBoard();
+            }
+        }
+
+        function endGame(msg, color) {
+            gameOver = true;
+            msgElement.innerText = msg;
+            msgElement.style.color = color;
+            drawBoard();
+        }
+
+        // 啟動遊戲
+        initGame(4, 3, 0.15, 'tavern');
+    </script>
+</body>
+</html>
