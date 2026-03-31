@@ -75,9 +75,8 @@
         }
 
         /* =========================================
-           [重點] 霜狼角色與 01.png 頭像魔法切片
+           [修正] 霜狼角色與 01.png 頭像魔法切片
            ========================================= */
-        /* 隱藏原本的 Emoji 字元，讓圖片背景顯現 */
         .cell.character {
             color: transparent; 
             font-size: 0;
@@ -85,24 +84,22 @@
             transition: transform 0.1s;
         }
 
-        /* 載入本機端/同資料夾的 01.png */
-        .cell.char-frostwolf {
-            background-image: url('01.png'); 
-            /* 將 4x2 的圖片放大，讓格子只顯示單一頭像 */
-            background-size: 400% 200%; 
-            background-repeat: no-repeat;
+        /* 增加 CSS 權重 (#board)，並使用 !important 強制顯示頭像，同時保留底下的地板 */
+        #board .cell.char-frostwolf {
+            background-image: url('01.png'), var(--bg-floor) !important; 
+            background-size: 400% 200%, cover !important; 
+            background-repeat: no-repeat, no-repeat !important;
         }
 
-        /* 利用背景定位 (background-position) 來切換表情 */
-        .emote-smile { background-position: 0% 0%; }         /* 左上：自信笑 */
-        .emote-serious { background-position: 33.33% 0%; }   /* 上二：嚴肅 */
-        .emote-cry { background-position: 66.66% 0%; }       /* 上三：哭泣 */
-        .emote-angry { background-position: 100% 0%; }       /* 右上：咬牙切齒 */
-        .emote-wolf { background-position: 0% 100%; }        /* 左下：狼嚎剪影 */
-        .emote-laugh { background-position: 33.33% 100%; }   /* 下二：大笑 */
-        .emote-talk { background-position: 66.66% 100%; }    /* 下三：講話 */
-        .emote-closed { background-position: 100% 100%; }    /* 右下：閉眼 */
-
+        /* 表情定位也加上 #board 與 !important，後面的 center 是確保地板不動 */
+        #board .emote-smile { background-position: 0% 0%, center !important; }         
+        #board .emote-serious { background-position: 33.33% 0%, center !important; }   
+        #board .emote-cry { background-position: 66.66% 0%, center !important; }       
+        #board .emote-angry { background-position: 100% 0%, center !important; }       
+        #board .emote-wolf { background-position: 0% 100%, center !important; }        
+        #board .emote-laugh { background-position: 33.33% 100%, center !important; }   
+        #board .emote-talk { background-position: 66.66% 100%, center !important; }    
+        #board .emote-closed { background-position: 100% 100%, center !important; }
 
         /* =========================================
            主題 1：鮑伯的酒館 (橫木地板 + 金棕色酒桶)
