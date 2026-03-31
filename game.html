@@ -42,7 +42,7 @@
             text-align: center;
         }
 
-        /* === 頭像 UI 設置 === */
+        /* === 頭像 UI 與 SVG 項圈設置 === */
         .portrait-ui {
             position: relative;
             width: 90px;
@@ -51,27 +51,57 @@
             background-size: 400% 200%; 
             background-repeat: no-repeat;
             box-shadow: 0 4px 15px rgba(0,0,0,0.8);
-            border: 3px solid rgba(255,255,255,0.1);
-            transition: background-position 0.2s, border-color 0.3s;
+            transition: background-position 0.2s;
             flex-shrink: 0; 
         }
+
+        /* 利用虛擬圖層 (::before) 疊加上 SVG 項圈邊框 */
+        .portrait-ui::before {
+            content: '';
+            position: absolute;
+            top: -3px; left: -3px; right: -3px; bottom: -3px;
+            pointer-events: none; /* 讓點擊可以穿透 */
+            z-index: 5;
+            background-size: 100% 100%;
+        }
+
+        /* 名牌 UI (::after) */
         .portrait-ui::after {
             content: attr(data-name);
             position: absolute;
-            bottom: -20px;
+            bottom: -22px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            padding: 1px 6px;
-            border-radius: 4px;
-            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
             white-space: nowrap;
+            z-index: 10;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.9); /* 增強對比度 */
         }
 
-        #portrait-frostwolf { background-image: url('01.png'); border-color: #f1c40f; }
-        #portrait-frostwolf::after { color: #f1c40f; }
-        #portrait-asmodan { background-image: url('03.png'); border-color: #3498db; }
-        #portrait-asmodan::after { color: #3498db; }
+        /* 🐺 霜狼：厚實灰銀狗狗項圈 (SVG) 與 灰色系名牌 */
+        #portrait-frostwolf { background-image: url('01.png'); }
+        #portrait-frostwolf::before {
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='3' y='3' width='94' height='94' rx='12' fill='none' stroke='%23556061' stroke-width='6'/><rect x='6' y='6' width='88' height='88' rx='9' fill='none' stroke='%232a2e2f' stroke-width='2'/><circle cx='10' cy='25' r='2' fill='%23bdc3c7'/><circle cx='10' cy='50' r='2' fill='%23bdc3c7'/><circle cx='10' cy='75' r='2' fill='%23bdc3c7'/><circle cx='90' cy='25' r='2' fill='%23bdc3c7'/><circle cx='90' cy='50' r='2' fill='%23bdc3c7'/><circle cx='90' cy='75' r='2' fill='%23bdc3c7'/><rect x='40' y='92' width='20' height='8' rx='2' fill='%2395a5a6'/><rect x='46' y='94' width='8' height='4' fill='%232c3e50'/></svg>");
+        }
+        #portrait-frostwolf::after { 
+            background: #2c3e50; /* 深灰藍底 */
+            color: #ecf0f1;      /* 亮銀白字 */
+            border: 2px solid #556061; 
+        }
+
+        /* 👾 阿茲莫丹：魔法褐色鈴鐺項圈 (SVG) 與 褐色系名牌 */
+        #portrait-asmodan { background-image: url('03.png'); }
+        #portrait-asmodan::before {
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='3' y='3' width='94' height='94' rx='12' fill='none' stroke='%235c3a21' stroke-width='6'/><rect x='3' y='3' width='94' height='94' rx='12' fill='none' stroke='%23d35400' stroke-width='1.5' stroke-dasharray='4 4'/><circle cx='50' cy='95' r='8' fill='%23f1c40f'/><circle cx='50' cy='96' r='2' fill='%238e44ad'/><line x1='47' y1='100' x2='53' y2='100' stroke='%238b4513' stroke-width='1'/></svg>");
+        }
+        #portrait-asmodan::after { 
+            background: #4a2311; /* 深褐皮底 */
+            color: #f39c12;      /* 亮金黃字 */
+            border: 2px solid #8b4513; 
+        }
 
         .emote-smile { background-position: 0% 0%; }         
         .emote-serious { background-position: 33.33% 0%; }   
@@ -83,7 +113,7 @@
         .emote-talk { background-position: 66.66% 100%; }    
         .emote-closed { background-position: 100% 100%; }    
         
-        /* === UI 按鈕設定 === */
+        /* === UI 按鈕設定與解鎖狀態 === */
         .controls {
             display: flex;
             gap: 8px;
@@ -101,12 +131,20 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        .controls button:hover { color: #fff; filter: brightness(1.2); }
+        .controls button:hover:not(:disabled) { color: #fff; filter: brightness(1.2); }
         .controls button.active {
             color: #fff;
             border: 2px solid #f1c40f;
             box-shadow: 0 0 10px rgba(241, 196, 15, 0.4);
             background-color: #2c3e50;
+        }
+        /* 反灰未解鎖按鈕 */
+        .controls button:disabled {
+            background-color: #111;
+            color: #444;
+            border: 2px solid #222;
+            cursor: not-allowed;
+            box-shadow: none;
         }
 
         @media (max-width: 600px) {
@@ -140,12 +178,11 @@
             transition: filter 0.3s, background-color 0.3s;
         }
 
-        /* === 精靈圖 90% 縮小化與像素優化 === */
         .character-sprite {
             position: absolute;
             width: 90%;
             height: 90%;
-            background-size: 756px 504px; /* 12*63, 8*63 */
+            background-size: 756px 504px; 
             background-repeat: no-repeat;
             pointer-events: none; 
             z-index: 10;
@@ -180,11 +217,9 @@
         }
         .cell.unexplored * { display: none !important; }
 
-        /* [調整] 提高探索過區域的亮度，讓地形清晰可見 */
         .cell.explored {
             filter: brightness(0.45) contrast(1.1); 
         }
-        /* 隱藏灰霧內的阿茲莫丹精靈和爆炸 */
         .cell.explored .sprite-asmodan,
         .cell.explored .collision-emoji { display: none !important; }
         .cell.explored .sprite-frostwolf { display: block !important; }
@@ -264,8 +299,8 @@
             <h1>霜狼鬼抓人</h1>
             <div class="controls">
                 <button id="btn-tavern" onclick="initGame(5, 4, 0.18, 'tavern')">鮑伯的酒館</button>
-                <button id="btn-stormwind" onclick="initGame(6, 5, 0.23, 'stormwind')">暗夜暴風城</button>
-                <button id="btn-northrend" onclick="initGame(8, 7, 0.28, 'northrend')">前往北裂境</button>
+                <button id="btn-stormwind" onclick="initGame(6, 5, 0.23, 'stormwind')" disabled>暗夜暴風城</button>
+                <button id="btn-northrend" onclick="initGame(8, 7, 0.28, 'northrend')" disabled>前往北裂境</button>
             </div>
         </div>
         <div id="portrait-asmodan" class="portrait-ui" data-name="阿茲莫丹"></div>
@@ -283,6 +318,9 @@
         
         let cols, rows, rockDensity, currentTheme;
         let playerPos, aiPos, rocks, gameOver;
+        
+        // 紀錄玩家的解鎖進度 (預設 1)
+        let unlockedLevel = 1;
         
         let fogOfWarMap = [];
         let playerFaceDir = 'face-down';
@@ -466,7 +504,7 @@
             if (playerPos.r === aiPos.r && playerPos.c === aiPos.c) {
                 updatePortraitEmote('frostwolf', 'emote-wolf');
                 updatePortraitEmote('asmodan', 'emote-serious'); 
-                endGame("抓到了！哈士奇的勝利！🎉", "#2ecc71");
+                endGame("抓到了！哈士奇的勝利！🎉", "#2ecc71", true);
                 return;
             }
             
@@ -477,9 +515,6 @@
             setTimeout(aiTurn, 250); 
         }
 
-        // =========================================
-        // [NEW] 綜合版 AI：狀態機與角落懲罰機制
-        // =========================================
         function aiTurn() {
             if (gameOver) return;
             let validMoves = getValidMoves(aiPos);
@@ -487,23 +522,20 @@
             if (validMoves.length === 0) {
                 updatePortraitEmote('asmodan', 'emote-serious'); 
                 updatePortraitEmote('frostwolf', 'emote-wolf');
-                endGame("獵物被包圍，傲嬌貓不甘心！😎", "#2ecc71");
+                endGame("獵物被包圍，傲嬌貓不甘心！😎", "#2ecc71", true);
                 return;
             }
             
-            // 計算目前貓與狗的距離
             let distToPlayer = Math.abs(aiPos.r - playerPos.r) + Math.abs(aiPos.c - playerPos.c);
             let bestMoves = [];
             let maxScore = -Infinity;
 
             if (distToPlayer > 4) {
-                // 階段一：鬆懈漫步 (在迷霧深處隨便走，但盡量不往角落縮)
                 validMoves.forEach(move => {
                     let score = 0; 
                     let isEdge = (move.r === 0 || move.r === rows - 1 || move.c === 0 || move.c === cols - 1);
                     let isCorner = (move.r === 0 || move.r === rows - 1) && (move.c === 0 || move.c === cols - 1);
 
-                    // 稍微懲罰角落與邊緣，讓他偏向在空曠處溜達
                     if (isCorner) score -= 2;
                     else if (isEdge) score -= 1;
 
@@ -511,17 +543,14 @@
                     else if (score === maxScore) { bestMoves.push(move); }
                 });
             } else {
-                // 階段二：高智商逃脫 (進入警戒範圍，認真躲避並拒絕死胡同)
                 validMoves.forEach(move => {
-                    // 基礎分數：距離霜狼越遠越好 (權重 10)
                     let dist = Math.abs(move.r - playerPos.r) + Math.abs(move.c - playerPos.c);
                     let score = dist * 10; 
                     
                     let isEdge = (move.r === 0 || move.r === rows - 1 || move.c === 0 || move.c === cols - 1);
                     let isCorner = (move.r === 0 || move.r === rows - 1) && (move.c === 0 || move.c === cols - 1);
 
-                    // 懲罰機制：重度懲罰角落，輕度懲罰邊緣
-                    if (isCorner) score -= 15; // 寧願少走 1.5 步的距離，也不進角落！
+                    if (isCorner) score -= 15; 
                     else if (isEdge) score -= 5;
 
                     if (score > maxScore) { maxScore = score; bestMoves = [move]; }
@@ -529,7 +558,6 @@
                 });
             }
             
-            // 從最高分的選項中隨機挑選一個
             let chosenMove = bestMoves[Math.floor(Math.random() * bestMoves.length)];
             
             let dr = chosenMove.r - aiPos.r;
@@ -541,7 +569,7 @@
             if (aiPos.r === playerPos.r && aiPos.c === playerPos.c) {
                 updatePortraitEmote('asmodan', 'emote-serious'); 
                 updatePortraitEmote('frostwolf', 'emote-wolf');
-                endGame("獵物自投羅網！哈士奇大勝！😎", "#2ecc71");
+                endGame("獵物自投羅網！哈士奇大勝！😎", "#2ecc71", true);
             } else {
                 if (currentTheme === 'tavern') msgElement.innerText = "黑暗中傳來木桶碰撞聲...（你的回合）";
                 else if (currentTheme === 'stormwind') msgElement.innerText = "傲嬌貓飛快逃竄...（你的回合）";
@@ -553,10 +581,27 @@
             }
         }
 
-        function endGame(msg, color) {
+        // [重點] 遊戲結束判定與進度解鎖
+        function endGame(msg, color, isWin = false) {
             gameOver = true;
             msgElement.innerText = msg;
             msgElement.style.color = color;
+            
+            if (isWin) {
+                // 如果在酒館獲勝，解鎖暴風城
+                if (currentTheme === 'tavern' && unlockedLevel < 2) {
+                    unlockedLevel = 2;
+                    document.getElementById('btn-stormwind').disabled = false;
+                    setTimeout(() => alert("🎉 恭喜！解鎖第二關【暗夜暴風城】！"), 300);
+                } 
+                // 如果在暴風城獲勝，解鎖北裂境
+                else if (currentTheme === 'stormwind' && unlockedLevel < 3) {
+                    unlockedLevel = 3;
+                    document.getElementById('btn-northrend').disabled = false;
+                    setTimeout(() => alert("🎉 恭喜！解鎖最終關卡【前往北裂境】！"), 300);
+                }
+            }
+            
             drawBoard();
         }
 
