@@ -10,90 +10,98 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             background-color: #121212; 
             color: #ecf0f1;
             margin: 0;
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
+            padding-top: 20px;
+            min-height: 100vh;
         }
 
-        /* === [NEW] 角落頭像 UI 設置 === */
+        /* === [優化] 頂部控制台 (HUD) 響應式排版 === */
+        .header-hud {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+        }
+
+        .title-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 { 
+            margin: 0 0 15px 0; 
+            font-size: 32px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            color: #f1c40f; 
+            text-align: center;
+        }
+
+        /* === 頭像 UI 設置 === */
         .portrait-ui {
-            position: absolute;
-            width: 140px;
-            height: 140px;
+            position: relative;
+            width: 100px;
+            height: 100px;
             border-radius: 12px;
-            background-size: 400% 200%; /* 適配 4x2 頭像圖 */
+            background-size: 400% 200%; 
             background-repeat: no-repeat;
             box-shadow: 0 4px 15px rgba(0,0,0,0.8);
             border: 3px solid rgba(255,255,255,0.1);
             transition: background-position 0.2s, border-color 0.3s;
-            z-index: 100;
+            flex-shrink: 0; /* 防止頭像在手機上被過度擠壓 */
         }
-        /* 姓名標籤 */
         .portrait-ui::after {
             content: attr(data-name);
             position: absolute;
-            bottom: -25px;
+            bottom: -22px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0,0,0,0.8);
-            padding: 2px 10px;
+            padding: 2px 8px;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             white-space: nowrap;
         }
 
-        /* 霜狼 (左下) */
         #portrait-frostwolf {
-            bottom: 30px;
-            left: 30px;
             background-image: url('01.png');
-            border-color: #f1c40f; /* 金色邊框 */
+            border-color: #f1c40f; 
         }
         #portrait-frostwolf::after { color: #f1c40f; }
 
-        /* 阿茲莫丹 (右上) */
         #portrait-asmodan {
-            top: 30px;
-            right: 30px;
             background-image: url('03.png');
-            border-color: #3498db; /* 藍色邊框 */
+            border-color: #3498db; 
         }
         #portrait-asmodan::after { color: #3498db; }
 
-        /* [NEW] 頭像表情切片定位 (適配 4x2 通用 RPGMaker 格式) */
-        /* 第一排 */
+        /* 頭像表情定位 */
         .emote-smile { background-position: 0% 0%; }         
         .emote-serious { background-position: 33.33% 0%; }   
         .emote-cry { background-position: 66.66% 0%; }       
         .emote-angry { background-position: 100% 0%; }       
-        /* 第二排 */
-        .emote-wolf { background-position: 0% 100%; }        /* 左下：霜狼狼嚎 */
-        .emote-pout { background-position: 0% 100%; }        /* 左下：阿茲莫丹憋扭 (共通) */
+        .emote-wolf { background-position: 0% 100%; }        
+        .emote-pout { background-position: 0% 100%; }        
         .emote-laugh { background-position: 33.33% 100%; }   
         .emote-talk { background-position: 66.66% 100%; }    
         .emote-closed { background-position: 100% 100%; }    
-
-        h1 { 
-            margin-bottom: 10px; 
-            font-size: 32px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-            color: #f1c40f; 
-        }
         
         /* === UI 按鈕設定 === */
         .controls {
-            margin-bottom: 20px;
             display: flex;
-            gap: 12px;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
         .controls button {
-            padding: 10px 18px;
-            font-size: 15px;
+            padding: 8px 14px;
+            font-size: 14px;
             font-weight: bold;
             color: #95a5a6;
             background-color: #2c3e50;
@@ -106,14 +114,18 @@
         .controls button.active {
             color: #fff;
             border: 2px solid #f1c40f;
-            box-shadow: 0 0 12px rgba(241, 196, 15, 0.4);
+            box-shadow: 0 0 10px rgba(241, 196, 15, 0.4);
             background-color: #34495e;
-            transform: translateY(-2px);
+        }
+
+        /* === 響應式手機版面微調 === */
+        @media (max-width: 600px) {
+            .header-hud { gap: 10px; }
+            .portrait-ui { width: 75px; height: 75px; } /* 手機上頭像縮小一點 */
+            h1 { font-size: 24px; }
         }
         
         /* === 遊戲盤面設定 === */
-        #game-container { position: relative; }
-
         #board {
             display: grid;
             grid-gap: 4px;
@@ -122,6 +134,7 @@
             border-radius: 8px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
             transition: background-color 0.5s;
+            margin-bottom: 20px;
         }
 
         .cell {
@@ -133,58 +146,54 @@
             align-items: center;
             position: relative;
             box-shadow: inset 0 0 8px rgba(0,0,0,0.4);
+            color: transparent; /* 隱藏 Emoji */
+            font-size: 0;
         }
 
         /* =========================================
-           [重點] 地圖行走精靈圖 (Sprite) 設置
+           [重點修復] 行走精靈圖與地板完美分離
            ========================================= */
-        .cell.sprite {
-            background-size: 300% 400% !important; /* 3x4 精靈圖 */
+        /* 我們把角色畫在 ::after 這個獨立的虛擬圖層上，這樣就不會影響地板大小 */
+        .cell.sprite::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-size: 300% 400%; /* 精靈圖比例 */
             background-repeat: no-repeat;
             z-index: 5;
-            color: transparent !important; /* 隱藏 Emoji */
-            font-size: 0 !important;
+            pointer-events: none;
         }
 
-        /* 霜狼精靈 (02.png) */
-        .cell.sprite-frostwolf {
-            background-image: url('02.png'), var(--bg-floor) !important;
+        .cell.sprite-frostwolf::after { background-image: url('02.png'); }
+        .cell.sprite-asmodan::after { background-image: url('04.png'); }
+
+        /* [修復] 方向定位：橫向 3 幀，中間站立幀在 50% */
+        .face-down::after { background-position: 50% 0%; }
+        .face-left::after { background-position: 50% 33.33%; }
+        .face-right::after { background-position: 50% 66.66%; }
+        .face-up::after { background-position: 50% 100%; }
+
+        /* [優化] 完美的 RPGMaker 步伐動畫：站立 -> 踏步 -> 站立 -> 踏另一腳 */
+        @keyframes rpg-walk {
+            0%   { background-position-x: 50%; }  /* 站立 */
+            25%  { background-position-x: 0%; }   /* 踏出左腳 */
+            50%  { background-position-x: 50%; }  /* 收回站立 */
+            75%  { background-position-x: 100%; } /* 踏出右腳 */
+            100% { background-position-x: 50%; }  /* 站立 */
         }
 
-        /* 阿茲莫丹精靈 (04.png) */
-        .cell.sprite-asmodan {
-            background-image: url('04.png'), var(--bg-floor) !important;
+        .walking::after {
+            animation: rpg-walk 0.6s infinite step-end;
         }
 
-        /* === [NEW] 精靈方向定位與行走動畫 === */
-        /* RPGMaker 標準精靈圖方向：
-           Row 0: 下 | Row 1: 左 | Row 2: 右 | Row 3: 上 */
-
-        /* 靜止狀態方向 (使用中幀 33.33%) */
-        .face-down { background-position: 33.33% 0%, center !important; }
-        .face-left { background-position: 33.33% 33.33%, center !important; }
-        .face-right { background-position: 33.33% 66.66%, center !important; }
-        .face-up { background-position: 33.33% 100%, center !important; }
-
-        /* 行走動畫定義 (從 0% 到 100% 幀，Steps(3) 代表跳躍三次) */
-        @keyframes walk-anim {
-            from { background-position-x: 0%, center; }
-            to { background-position-x: 100%, center; }
-        }
-
-        /* 當格子被加入 .walking 類時觸發動畫 */
-        .walking {
-            animation: walk-anim 0.5s steps(3) infinite;
-        }
-
-        /* 碰裝狀態仍然使用 💥 */
+        /* 碰裝狀態：隱藏角色，顯示爆炸 emoji */
+        .cell.sprite.collision::after { display: none; }
         .cell.sprite.collision {
             color: #fff !important;
             font-size: 40px !important;
-            background-image: none !important; 
         }
 
-        /* === 主題材質設置 (維持) === */
+        /* === 主題材質設置 === */
         /* 1：酒館 */
         #board[data-theme="tavern"] .cell {
             background-color: #9c5b2b;
@@ -194,7 +203,6 @@
             background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><rect x='3' y='2' width='6' height='8' fill='%23b06221'/><rect x='2' y='3' width='8' height='6' fill='%23b06221'/><rect x='3' y='2' width='4' height='1' fill='%23d99c68'/><rect x='2' y='3' width='1' height='3' fill='%23d99c68'/><rect x='6' y='9' width='3' height='1' fill='%23522b11'/><rect x='9' y='5' width='1' height='4' fill='%23522b11'/><rect x='2' y='3' width='8' height='1' fill='%23000'/><rect x='2' y='8' width='8' height='1' fill='%23000'/><rect x='5' y='2' width='1' height='8' fill='%233d210d'/><rect x='8' y='2' width='1' height='8' fill='%233d210d'/></svg>"), 
                               var(--bg-floor);
             background-size: 65%, cover;
-            background-repeat: no-repeat;
             background-position: center;
         }
 
@@ -207,7 +215,6 @@
             background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><rect x='2' y='1' width='4' height='1' fill='%23777'/><rect x='1' y='2' width='6' height='4' fill='%23777'/><rect x='2' y='6' width='4' height='1' fill='%23777'/><rect x='2' y='2' width='2' height='1' fill='%23aaa'/><rect x='1' y='3' width='1' height='1' fill='%23aaa'/><rect x='5' y='4' width='2' height='2' fill='%23444'/><rect x='3' y='5' width='2' height='1' fill='%23444'/></svg>"), 
                               var(--bg-floor);
             background-size: 65%, cover;
-            background-repeat: no-repeat;
             background-position: center;
         }
 
@@ -221,11 +228,10 @@
             background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='7' y='6' width='2' height='9' fill='%233e2723'/><rect x='5' y='14' width='2' height='1' fill='%233e2723'/><rect x='9' y='13' width='2' height='2' fill='%233e2723'/><rect x='5' y='6' width='2' height='2' fill='%233e2723'/><rect x='3' y='4' width='2' height='2' fill='%233e2723'/><rect x='9' y='5' width='2' height='2' fill='%233e2723'/><rect x='11' y='3' width='2' height='2' fill='%233e2723'/><rect x='7' y='2' width='2' height='4' fill='%233e2723'/><rect x='5' y='1' width='2' height='2' fill='%233e2723'/></svg>"), 
                               var(--bg-floor);
             background-size: 75%, cover;
-            background-repeat: no-repeat;
             background-position: center bottom, center;
         }
 
-        /* === 綠色邊框移動提示 === */
+        /* 綠色邊框移動提示 */
         .highlight {
             cursor: pointer;
             box-shadow: inset 0 0 0 5px #2ecc71, inset 0 0 15px rgba(46, 204, 113, 0.3) !important;
@@ -237,46 +243,43 @@
         }
         
         #msg {
-            margin-top: 15px;
             font-size: 20px;
             font-weight: bold;
             height: 30px;
             color: #f39c12;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-    <div id="portrait-frostwolf" class="portrait-ui" data-name="霜狼"></div>
-    <div id="portrait-asmodan" class="portrait-ui" data-name="阿茲莫丹"></div>
-
-    <h1>霜狼鬼抓人</h1>
-    
-    <div class="controls">
-        <button id="btn-tavern" onclick="initGame(4, 3, 0.15, 'tavern')">鮑伯的酒館</button>
-        <button id="btn-stormwind" onclick="initGame(4, 4, 0.20, 'stormwind')">暴風城黑夜</button>
-        <button id="btn-northrend" onclick="initGame(5, 4, 0.25, 'northrend')">前往北裂境</button>
+    <div class="header-hud">
+        <div id="portrait-frostwolf" class="portrait-ui" data-name="霜狼"></div>
+        <div class="title-area">
+            <h1>霜狼鬼抓人</h1>
+            <div class="controls">
+                <button id="btn-tavern" onclick="initGame(4, 3, 0.15, 'tavern')">鮑伯的酒館</button>
+                <button id="btn-stormwind" onclick="initGame(4, 4, 0.20, 'stormwind')">暴風城黑夜</button>
+                <button id="btn-northrend" onclick="initGame(5, 4, 0.25, 'northrend')">前往北裂境</button>
+            </div>
+        </div>
+        <div id="portrait-asmodan" class="portrait-ui" data-name="阿茲莫丹"></div>
     </div>
 
-    <div id="game-container">
-        <div id="board" data-theme="tavern"></div>
-    </div>
-    
+    <div id="board" data-theme="tavern"></div>
     <div id="msg">載入中...</div>
 
     <script>
         const boardElement = document.getElementById('board');
         const msgElement = document.getElementById('msg');
         
-        // 抓取頭像 UI 元素
         const uiFrostwolf = document.getElementById('portrait-frostwolf');
         const uiAsmodan = document.getElementById('portrait-asmodan');
         
         let cols, rows, rockDensity, currentTheme;
         let playerPos, aiPos, rocks, gameOver;
         
-        // 用變數記錄目前的「方向」類
         let playerFaceDir = 'face-down';
         let aiFaceDir = 'face-down';
 
@@ -289,11 +292,9 @@
             aiPos = { r: rows - 1, c: cols - 1 };
             gameOver = false;
             
-            // 重置方向
             playerFaceDir = 'face-down';
             aiFaceDir = 'face-down';
             
-            // 重置角落 UI 表情
             updatePortraitEmote('frostwolf', 'emote-smile');
             updatePortraitEmote('asmodan', 'emote-serious');
             
@@ -305,11 +306,9 @@
 
             generateMap();
             
-            // 根據主題設定開場白與頭像表情
             if (theme === 'tavern') {
                 msgElement.innerText = "酒館裡，霜狼哈士奇咬著尾巴出現了！";
                 msgElement.style.color = "#f39c12"; 
-                // 阿茲莫丹感到煩躁
                 updatePortraitEmote('asmodan', 'emote-pout');
             } else if (theme === 'stormwind') {
                 msgElement.innerText = "黑夜暗巷，貓咪法師阿茲莫丹哼了一聲...";
@@ -319,19 +318,15 @@
                 msgElement.innerText = "冰天雪地，霜狼興奮狼嚎，貓咪則瑟瑟發抖...";
                 msgElement.style.color = "#ecf0f1"; 
                 updatePortraitEmote('asmodan', 'emote-cry');
-                // 霜狼興奮，準備狼嚎
                 updatePortraitEmote('frostwolf', 'emote-talk');
             }
             
             drawBoard();
         }
 
-        // [NEW] 輔助函數：更新角落 UI 表情
         function updatePortraitEmote(char, emoteClass) {
             const el = char === 'frostwolf' ? uiFrostwolf : uiAsmodan;
-            // 移除原本所有的 emote- 開頭類
             el.className = el.className.replace(/\bemote-\S+/g, '');
-            // 加入新的
             el.classList.add(emoteClass);
         }
 
@@ -380,13 +375,12 @@
             return moves;
         }
 
-        // [NEW] 根據移動量判斷方向類 (RPGMaker 格式)
         function getDirectionClass(dr, dc) {
-            if (dr > 0) return 'face-down'; // 向下移動
-            if (dr < 0) return 'face-up';   // 向上移動
-            if (dc > 0) return 'face-right';// 向右移動
-            if (dc < 0) return 'face-left'; // 向左移動
-            return 'face-down'; // 預設
+            if (dr > 0) return 'face-down'; 
+            if (dr < 0) return 'face-up';   
+            if (dc > 0) return 'face-right';
+            if (dc < 0) return 'face-left'; 
+            return 'face-down'; 
         }
 
         function drawBoard() {
@@ -418,11 +412,9 @@
                         cell.classList.add('sprite', 'collision'); 
                         cell.innerText = '💥'; 
                     } else if (hasPlayer) {
-                        // [重點] 顯示霜狼精靈圖
                         cell.classList.add('sprite', 'sprite-frostwolf', playerFaceDir);
                         cell.innerText = '😎'; 
                     } else if (hasAI) {
-                        // [重點] 顯示阿茲莫丹精靈圖
                         cell.classList.add('sprite', 'sprite-asmodan', aiFaceDir);
                         cell.innerText = '👾';
                     }
@@ -439,7 +431,6 @@
             }
         }
 
-        // [NEW] 輔助函數：取得特定格子的 DOM 元素
         function getCellElement(r, c) {
             let index = r * cols + c;
             return boardElement.children[index];
@@ -448,36 +439,29 @@
         function playerTurn(r, c) {
             if (gameOver) return;
             
-            // 判斷方向並啟動行走動畫
             let dr = r - playerPos.r;
             let dc = c - playerPos.c;
             playerFaceDir = getDirectionClass(dr, dc);
             
-            // 取得目前的格子並加入行走類
             let currentCell = getCellElement(playerPos.r, playerPos.c);
             if (currentCell) {
-                currentCell.className = currentCell.className.replace(/\bface-\S+/g, ''); // 移除舊方向
+                currentCell.className = currentCell.className.replace(/\bface-\S+/g, ''); 
                 currentCell.classList.add(playerFaceDir, 'walking');
             }
 
-            // 稍微延遲後更新位置，讓動畫有時間播放 (或者直接重繪，CSS 會自動處理瞬時狀態)
             playerPos = { r: r, c: c };
             
             if (playerPos.r === aiPos.r && playerPos.c === aiPos.c) {
-                // 霜狼抓到了！變身狼嚎
                 updatePortraitEmote('frostwolf', 'emote-wolf');
-                // 阿茲莫丹認輸
                 updatePortraitEmote('asmodan', 'emote-closed');
                 endGame("抓到了！哈士奇的勝利！🎉", "#2ecc71");
                 return;
             }
             
-            // 恢復阿茲莫丹憋扭表情 (如果他之前在哭)
             if (currentTheme !== 'northrend') updatePortraitEmote('asmodan', 'emote-pout');
 
-            // 為了流暢度，我們先重繪，CSS 動畫類會在重繪後移除，產生「靜止」幀
             drawBoard(); 
-            setTimeout(aiTurn, 250); // 縮短延遲
+            setTimeout(aiTurn, 250); 
         }
 
         function aiTurn() {
@@ -485,9 +469,7 @@
             let validMoves = getValidMoves(aiPos);
             
             if (validMoves.length === 0) {
-                // 阿茲莫丹認輸
                 updatePortraitEmote('asmodan', 'emote-angry');
-                // 霜狼狼嚎
                 updatePortraitEmote('frostwolf', 'emote-wolf');
                 endGame("獵物被包圍，傲嬌貓認輸了！😎", "#2ecc71");
                 return;
@@ -502,7 +484,6 @@
             
             let chosenMove = bestMoves[Math.floor(Math.random() * bestMoves.length)];
             
-            // 判斷 AI 方向
             let dr = chosenMove.r - aiPos.r;
             let dc = chosenMove.c - aiPos.c;
             aiFaceDir = getDirectionClass(dr, dc);
@@ -510,7 +491,6 @@
             aiPos = chosenMove;
             
             if (aiPos.r === playerPos.r && aiPos.c === playerPos.c) {
-                // 獵物自投羅網
                 updatePortraitEmote('asmodan', 'emote-closed');
                 updatePortraitEmote('frostwolf', 'emote-wolf');
                 endGame("獵物自投羅網！哈士奇大勝！😎", "#2ecc71");
@@ -519,7 +499,7 @@
                 else if (currentTheme === 'stormwind') msgElement.innerText = "阿茲莫丹飛快逃竄...（你的回合）";
                 else if (currentTheme === 'northrend') {
                     msgElement.innerText = "呼呼... 好冷...（你的回合）";
-                    updatePortraitEmote('asmodan', 'emote-cry'); // 繼續哭
+                    updatePortraitEmote('asmodan', 'emote-cry'); 
                 }
                 drawBoard();
             }
@@ -532,7 +512,6 @@
             drawBoard();
         }
 
-        // 啟動酒館
         initGame(4, 3, 0.15, 'tavern');
     </script>
 </body>
