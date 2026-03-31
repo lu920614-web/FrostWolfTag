@@ -83,7 +83,7 @@
 
         /* 頭像表情定位 */
         .emote-smile { background-position: 0% 0%; }         
-        .emote-serious { background-position: 33.33% 0%; }   /* 上二：有點生氣的表情 */
+        .emote-serious { background-position: 33.33% 0%; }   
         .emote-cry { background-position: 66.66% 0%; }       
         .emote-angry { background-position: 100% 0%; }       
         .emote-wolf { background-position: 0% 100%; }        
@@ -145,11 +145,11 @@
             align-items: center;
             position: relative;
             box-shadow: inset 0 0 8px rgba(0,0,0,0.4);
-            overflow: hidden; /* 防止精靈圖超出格子 */
+            overflow: hidden; 
         }
 
         /* =========================================
-           [全新重構] 獨立的精靈圖層 (Sprite Layer)
+           [終極修復] 3x5 精靈圖層對應設置
            ========================================= */
         .character-sprite {
             position: absolute;
@@ -157,22 +157,25 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-size: 300% 400%; /* RPGMaker 3x4 規格 */
+            /* 這裡修改為 500% 高度，因為你的圖有 5 排！ */
+            background-size: 300% 500%; 
             background-repeat: no-repeat;
-            pointer-events: none; /* 讓點擊可以穿透圖層點到格子 */
+            pointer-events: none; 
             z-index: 10;
+            image-rendering: pixelated; /* 讓像素圖保持邊緣銳利 */
         }
 
         .sprite-frostwolf { background-image: url('02.png'); }
         .sprite-asmodan { background-image: url('04.png'); }
 
-        /* 方向定位 (橫向 3 幀，中間站立幀是剛好 50%) */
+        /* Y軸定位 (總高度為 100%，除以 4 個間隔 = 0, 25, 50, 75, 100) */
+        /* 第一列：往下 | 第二列：往左 | 第三列：往右 | 第四列：往上 */
         .face-down { background-position: 50% 0%; }
-        .face-left { background-position: 50% 33.33%; }
-        .face-right { background-position: 50% 66.66%; }
-        .face-up { background-position: 50% 100%; }
+        .face-left { background-position: 50% 25%; }
+        .face-right { background-position: 50% 50%; }
+        .face-up { background-position: 50% 75%; }
 
-        /* 行走動畫劇本 (站立 -> 踏左腳 -> 站立 -> 踏右腳) */
+        /* 動畫劇本更新 Y 軸百分比 */
         @keyframes walk-down { 
             0% { background-position: 50% 0%; } 
             25% { background-position: 0% 0%; } 
@@ -181,28 +184,27 @@
             100% { background-position: 50% 0%; } 
         }
         @keyframes walk-left { 
-            0% { background-position: 50% 33.33%; } 
-            25% { background-position: 0% 33.33%; } 
-            50% { background-position: 50% 33.33%; } 
-            75% { background-position: 100% 33.33%; } 
-            100% { background-position: 50% 33.33%; } 
+            0% { background-position: 50% 25%; } 
+            25% { background-position: 0% 25%; } 
+            50% { background-position: 50% 25%; } 
+            75% { background-position: 100% 25%; } 
+            100% { background-position: 50% 25%; } 
         }
         @keyframes walk-right { 
-            0% { background-position: 50% 66.66%; } 
-            25% { background-position: 0% 66.66%; } 
-            50% { background-position: 50% 66.66%; } 
-            75% { background-position: 100% 66.66%; } 
-            100% { background-position: 50% 66.66%; } 
+            0% { background-position: 50% 50%; } 
+            25% { background-position: 0% 50%; } 
+            50% { background-position: 50% 50%; } 
+            75% { background-position: 100% 50%; } 
+            100% { background-position: 50% 50%; } 
         }
         @keyframes walk-up { 
-            0% { background-position: 50% 100%; } 
-            25% { background-position: 0% 100%; } 
-            50% { background-position: 50% 100%; } 
-            75% { background-position: 100% 100%; } 
-            100% { background-position: 50% 100%; } 
+            0% { background-position: 50% 75%; } 
+            25% { background-position: 0% 75%; } 
+            50% { background-position: 50% 75%; } 
+            75% { background-position: 100% 75%; } 
+            100% { background-position: 50% 75%; } 
         }
 
-        /* 綁定動畫 (使用 step-end 讓切換瞬間完成，不會滑動) */
         .walking.face-down { animation: walk-down 0.6s infinite step-end; }
         .walking.face-left { animation: walk-left 0.6s infinite step-end; }
         .walking.face-right { animation: walk-right 0.6s infinite step-end; }
@@ -216,7 +218,7 @@
             position: relative;
         }
 
-        /* === 主題材質設置 (修復障礙物重複與地板放大) === */
+        /* === 主題材質設置 === */
         /* 1：酒館 */
         .cell.floor-tavern {
             background-color: #9c5b2b;
@@ -225,9 +227,9 @@
         .cell.floor-tavern.obstacle {
             background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><rect x='3' y='2' width='6' height='8' fill='%23b06221'/><rect x='2' y='3' width='8' height='6' fill='%23b06221'/><rect x='3' y='2' width='4' height='1' fill='%23d99c68'/><rect x='2' y='3' width='1' height='3' fill='%23d99c68'/><rect x='6' y='9' width='3' height='1' fill='%23522b11'/><rect x='9' y='5' width='1' height='4' fill='%23522b11'/><rect x='2' y='3' width='8' height='1' fill='%23000'/><rect x='2' y='8' width='8' height='1' fill='%23000'/><rect x='5' y='2' width='1' height='8' fill='%233d210d'/><rect x='8' y='2' width='1' height='8' fill='%233d210d'/></svg>"), 
                               url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'><rect width='80' height='80' fill='%23a6683c'/><rect y='20' width='80' height='20' fill='%2391562e'/><rect y='60' width='80' height='20' fill='%23804a26'/><path d='M0 20h80M0 40h80M0 60h80' stroke='%23573016' stroke-width='2'/></svg>");
-            background-size: 65%, auto; /* 取消 cover，地板恢復正常尺寸 */
+            background-size: 65%, auto; 
             background-position: center;
-            background-repeat: no-repeat, repeat; /* 防止障礙物重複，允許地板重複 */
+            background-repeat: no-repeat, repeat; 
         }
 
         /* 2：暴風城 */
@@ -428,7 +430,6 @@
                     } else if (hasPlayer && hasAI) {
                         contentHtml = '<div class="collision-emoji">💥</div>';
                     } else if (hasPlayer) {
-                        // 在格子內部產生專屬的精靈圖層，並強制賦予 stepping 動畫讓遊戲有活著的感覺
                         contentHtml = `<div class="character-sprite sprite-frostwolf ${playerFaceDir} walking"></div>`;
                     } else if (hasAI) {
                         contentHtml = `<div class="character-sprite sprite-asmodan ${aiFaceDir} walking"></div>`;
@@ -459,7 +460,7 @@
             
             if (playerPos.r === aiPos.r && playerPos.c === aiPos.c) {
                 updatePortraitEmote('frostwolf', 'emote-wolf');
-                updatePortraitEmote('asmodan', 'emote-serious'); // 阿茲莫丹認輸的生氣表情
+                updatePortraitEmote('asmodan', 'emote-serious'); 
                 endGame("抓到了！哈士奇的勝利！🎉", "#2ecc71");
                 return;
             }
@@ -475,7 +476,7 @@
             let validMoves = getValidMoves(aiPos);
             
             if (validMoves.length === 0) {
-                updatePortraitEmote('asmodan', 'emote-serious'); // 阿茲莫丹無路可退的生氣表情
+                updatePortraitEmote('asmodan', 'emote-serious'); 
                 updatePortraitEmote('frostwolf', 'emote-wolf');
                 endGame("獵物被包圍，傲嬌貓不甘心！😎", "#2ecc71");
                 return;
